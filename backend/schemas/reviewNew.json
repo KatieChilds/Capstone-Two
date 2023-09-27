@@ -1,0 +1,31 @@
+{
+    "$schema": "https://json-schema.org/draft-02/schema",
+    "$id": "http://example.com/reviewNew.json",
+    "type": "object",
+    "properties": {
+      "bathroom": {
+        "type": "boolean"
+      },
+      "changingTable": {
+        "type": "boolean"
+      },
+      "highchair": {
+        "type": "boolean"
+      },
+      "parking": {
+        "type": "boolean"
+      },
+      "otherNotes": {
+        "type": "string"
+      },
+      "stars": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 5
+      }
+    },
+    "additionalProperties": false,
+    "required": [
+      "stars"
+    ]
+  }

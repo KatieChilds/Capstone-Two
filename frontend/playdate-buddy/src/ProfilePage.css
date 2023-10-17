@@ -1,0 +1,10 @@
+.user-info {
+  width: 50%;
+  margin: auto;
+  border: 3px solid goldenrod;
+}
+
+.children-info {
+  width: 50%;
+  margin: auto;
+}

@@ -1,17 +1,16 @@
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
-const {
-  WEAVY_API_KEY,
-  WEAVY_SERVER,
-} = require("../dot-env");
 const axios = require("axios");
+require("dotenv").config();
+const WEAVY_API_KEY = process.env.WEAVY_API_KEY;
+const WEAVY_SERVER = process.env.WEAVY_SERVER;
 /** return signed JWT from user data. */
 
 function createToken(user) {
   let payload = {
     username: user.username,
-    city: user.city,
-    country: user.country,
+    lat: user.lat,
+    lng: user.lng,
     access_token: user.access_token,
   };
 
@@ -19,8 +18,6 @@ function createToken(user) {
 }
 
 async function getWeavyAccessToken(user) {
-  console.log("USER?", user);
-
   const weavyUser = await axios.post(
     `${WEAVY_SERVER}/api/users/${user}/tokens`,
     JSON.stringify({
@@ -35,7 +32,6 @@ async function getWeavyAccessToken(user) {
     }
   );
 
-  console.log(weavyUser.data.access_token);
   return weavyUser.data.access_token;
 }
 module.exports = { createToken, getWeavyAccessToken };

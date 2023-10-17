@@ -6,8 +6,8 @@ CREATE TABLE users (
     last_name TEXT NOT NULL,
     email TEXT NOT NULL
         CHECK (position('@' IN email) > 1),
-    city TEXT NOT NULL,
-    country TEXT NOT NULL,
+    lat FLOAT NOT NULL,
+    lng FLOAT NOT NULL,
     avatar TEXT DEFAULT('user_default_avatar.png'),
     token TEXT 
 );
@@ -16,7 +16,7 @@ CREATE TABLE children (
     id SERIAL PRIMARY KEY,
     parent_username VARCHAR(25) NOT NULL
         REFERENCES users ON DELETE CASCADE,
-    age INTEGER NOT NULL,
+    dob DATE NOT NULL,
     gender TEXT NOT NULL
 );
 

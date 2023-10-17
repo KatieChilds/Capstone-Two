@@ -21,7 +21,7 @@ const { findPlace } = require("../helpers/placesAPI");
 const router = express.Router();
 
 /** GET / => {users: [{username, firstName, avatar}, ...]}
- * Returns: list of users who are local to the logged in user.
+ * Returns: list of users
  * Authorization required: logged in user
  */
 router.get(
@@ -32,10 +32,7 @@ router.get(
       let q = req.query;
       if (q.minAge !== undefined) q.minAge = +q.minAge;
       if (q.maxAge !== undefined) q.maxAge = +q.maxAge;
-      const user = res.locals.user;
-      const city = user.city;
-      const country = user.country;
-      const users = await User.findLocal(city, country, q);
+      const users = await User.findUsers(q);
       return res.json({ users });
     } catch (err) {
       return next(err);
@@ -79,11 +76,12 @@ router.patch(
         const errs = validator.errors.map((e) => e.stack);
         throw new BadRequestError(errs);
       }
-
+      console.log("PATCH REQ BODY", req.body);
       const user = await User.update(
         req.params.username,
         req.body
       );
+      console.log("PATCH user", user);
       return res.json({ user });
     } catch (err) {
       return next;
@@ -141,31 +139,31 @@ router.post(
  * Returns: {updated: child info for username}
  * Authorization: same user as username
  */
-router.patch(
-  "/:username/children/edit",
-  ensureCorrectUser,
-  async function (req, res, next) {
-    try {
-      const validator = jsonschema.validate(
-        req.body,
-        updateChildSchema
-      );
+// router.patch(
+//   "/:username/children/edit",
+//   ensureCorrectUser,
+//   async function (req, res, next) {
+//     try {
+//       const validator = jsonschema.validate(
+//         req.body,
+//         updateChildSchema
+//       );
 
-      if (!validator.valid) {
-        const errs = validator.errors.map((e) => e.stack);
-        throw new BadRequestError(errs);
-      }
+//       if (!validator.valid) {
+//         const errs = validator.errors.map((e) => e.stack);
+//         throw new BadRequestError(errs);
+//       }
 
-      await User.editChild(req.params.username, req.body);
+//       await User.editChild(req.params.username, req.body);
 
-      return res.json({
-        updated: `child info for ${req.params.username}`,
-      });
-    } catch (err) {
-      return next(err);
-    }
-  }
-);
+//       return res.json({
+//         updated: `child info for ${req.params.username}`,
+//       });
+//     } catch (err) {
+//       return next(err);
+//     }
+//   }
+// );
 
 /** POST /[username]/friends/[user_friended]/add {friend} =>
  * {friended: user_friended}
@@ -234,11 +232,12 @@ router.delete(
  * Returns: Top place matching search term from Google Places API. Adds top matching place to database.
  * Authorization required: logged in user
  */
-router.get(
+router.post(
   "/place/search",
   ensureLoggedIn,
   async function (req, res, next) {
     try {
+      console.log(req.body);
       const place = await findPlace(req.body.searchName);
       return res.json({ place });
     } catch (err) {
@@ -281,6 +280,25 @@ router.post(
       return res
         .status(201)
         .json({ Saved: `Place: ${req.params.id}` });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/** GET /[username]/places =>
+ * Returns: {places}
+ * Authorization: same user as username
+ */
+router.get(
+  "/:username/places",
+  ensureCorrectUser,
+  async function (req, res, next) {
+    try {
+      const places = await User.getUserPlaces(
+        req.params.username
+      );
+      return res.json({ places });
     } catch (err) {
       return next(err);
     }
@@ -443,13 +461,16 @@ router.get(
   ensureCorrectUser,
   async function (req, res, next) {
     try {
+      console.log("REQ PARAMS", req.params);
       const { username, id } = req.params;
-      const { timestamp } = req.body;
+      const { timestamp } = req.query;
+      console.log("TIMESTAMP IN BACKEND ROUTE", timestamp);
       const date = await User.getDate(
         username,
         id,
         timestamp
       );
+      console.log("DATE WITH RETURNING:", date.with);
       return res.json({ date });
     } catch (err) {
       return next(err);
@@ -486,6 +507,8 @@ router.delete(
     try {
       const { username, id } = req.params;
       const { timestamp } = req.body;
+      console.log("TIMESTAMP in backend ROUTE", timestamp);
+      console.log("REQ BODY", req.body);
       await User.cancelDate(username, id, timestamp);
       return res.json({
         Cancelled: `Date for ${username} at ${id} at ${timestamp}`,

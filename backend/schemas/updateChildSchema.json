@@ -3,8 +3,8 @@
     "$id": "http://example.com/userAuth.json",
     "type": "object",
     "properties": {
-      "age": {
-        "type": "integer"
+      "dob": {
+        "type": "string"
       },
       "gender": {
         "type": "string"

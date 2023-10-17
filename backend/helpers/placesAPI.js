@@ -2,7 +2,8 @@ const {
   GOOGLE_PLACES_API_BASE_URL,
   GOOGLE_PLACES_DETAILS_API_BASE_URL,
 } = require("../config.js");
-const { GOOGLE_API_KEY } = require("../dot-env");
+require("dotenv").config();
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 const { NotFoundError } = require("../expressError.js");
 const axios = require("axios");
 const db = require("../db.js");
@@ -26,12 +27,13 @@ async function addPlace(place) {
 }
 
 async function googlePlacesAPICall(searchName) {
+  console.log("PLACES API SEARCHNAME", searchName);
   const term = searchName.replaceAll(" ", "%2C").trim();
+  console.log("TERM", term);
   const result = await axios.get(
     `${GOOGLE_PLACES_API_BASE_URL}${term}&inputtype=textquery&key=${GOOGLE_API_KEY}`
   );
   if (result.data.candidates != []) {
-    console.log(result.data.candidates);
     const { name, place_id, formatted_address } =
       result.data.candidates[0];
     const { lat, lng } =
@@ -58,9 +60,7 @@ async function googlePlaceDetailsAPICall(id) {
     `${GOOGLE_PLACES_DETAILS_API_BASE_URL}${id}&key=${GOOGLE_API_KEY}`
   );
 
-  console.log("API result", result);
   if (result.data.result != {}) {
-    console.log("API DATA", result.data.candidates);
     const { name, place_id, formatted_address } =
       result.data.result;
     const { lat, lng } =
@@ -83,6 +83,7 @@ async function googlePlaceDetailsAPICall(id) {
 }
 
 async function findPlace(searchName) {
+  console.log(searchName);
   let placeInfo = await googlePlacesAPICall(searchName);
 
   let placeCheck = await db.query(

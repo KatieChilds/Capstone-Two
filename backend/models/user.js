@@ -2,6 +2,7 @@
 
 const db = require("../db");
 const bcrypt = require("bcrypt");
+const moment = require("moment");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 const {
   findPlace,
@@ -25,8 +26,8 @@ class User {
                     first_name AS firstName,
                     last_name AS lastName,
                     email,
-                    city,
-                    country,
+                    lat,
+                    lng,
                     token
             FROM users
             WHERE username = $1`,
@@ -80,6 +81,10 @@ class User {
       BCRYPT_WORK_FACTOR
     );
 
+    const place = await findPlace(`${city} ${country}`);
+    const lat = place.lat;
+    const lng = place.lng;
+
     const result = await db.query(
       `INSERT INTO users
             (username,
@@ -87,40 +92,37 @@ class User {
                 first_name,
                 last_name,
                 email,
-                city,
-                country,
+                lat,
+                lng,
                 avatar,
                 token)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING username, first_name AS "firstName", last_name AS "lastName", email, city, country, avatar, token AS access_token`,
+        RETURNING username, first_name AS "firstName", last_name AS "lastName", email, lat, lng, avatar, token AS access_token`,
       [
         username,
         hashedPassword,
         firstName,
         lastName,
         email,
-        city,
-        country,
+        lat,
+        lng,
         avatar,
         access_token,
       ]
     );
 
     const user = result.rows[0];
+    console.log("USER - register from model", user);
     return user;
   }
 
-  /** Given a city and country, finds all local users.
+  /** Given an optional query string, can filter users based on child info
    * Returns [{username, firstName}] */
-  static async findLocal(
-    city,
-    country,
-    { minAge, maxAge, gender } = {}
-  ) {
+  static async findUsers({ minAge, maxAge, gender } = {}) {
     let query = `SELECT u.username, 
                 u.first_name AS firstName, u.avatar
                 FROM users AS u
-                JOIN children AS c
+                LEFT JOIN children AS c
                 ON u.username = c.parent_username`;
 
     let whereExpressions = [];
@@ -145,17 +147,21 @@ class User {
       );
     }
 
-    queryValues.push(city);
-    whereExpressions.push(`city = $${queryValues.length}`);
-    queryValues.push(country);
-    whereExpressions.push(
-      `country = $${queryValues.length}`
-    );
+    // queryValues.push(city);
+    // whereExpressions.push(`city = $${queryValues.length}`);
+    // queryValues.push(country);
+    // whereExpressions.push(
+    //   `country = $${queryValues.length}`
+    // );
+    if (whereExpressions.length !== 0) {
+      query += " WHERE " + whereExpressions.join(" AND ");
+    }
 
-    query += " WHERE " + whereExpressions.join(" AND ");
+    console.log(query);
+    console.log(queryValues);
 
     // Finalize query
-    // query += " GROUP BY username";
+    query += " GROUP BY username";
     const results = await db.query(query, queryValues);
     return results.rows;
   }
@@ -163,7 +169,7 @@ class User {
   //   Given a username, return info for that user, including info about children: {age, gender}. Throws NotFoundError if user not found.
   static async get(username) {
     const userRes = await db.query(
-      `SELECT username, first_name AS firstName, last_name AS lastName, email, city, country, avatar
+      `SELECT username, first_name AS firstName, last_name AS lastName, email, lat, lng, avatar
         FROM users
         WHERE username = $1`,
       [username]
@@ -175,17 +181,18 @@ class User {
       throw new NotFoundError(`No user: ${username}`);
 
     const userChildrenRes = await db.query(
-      `SELECT age, gender
+      `SELECT dob, gender
         FROM children
         WHERE parent_username = $1`,
       [username]
     );
 
     user.children = userChildrenRes.rows.map((c) => ({
-      age: c.age,
+      age: moment(c.dob).fromNow(true),
       gender: c.gender,
     }));
 
+    console.log("BACKEND USER", user);
     return user;
   }
 
@@ -195,6 +202,7 @@ class User {
    * Throws NotFoundError if user not found
    */
   static async update(username, data) {
+    console.log("DATA", data);
     if (data.password) {
       data.password = await bcrypt.hash(
         data.password,
@@ -202,12 +210,23 @@ class User {
       );
     }
 
+    if (data.city || data.country) {
+      const place = await findPlace(
+        `${data.city} ${data.country}`
+      );
+      const lat = place.lat;
+      const lng = place.lng;
+      delete data.city;
+      delete data.country;
+      data = { ...data, lat, lng };
+    }
+
     const { setCols, values } = sqlForPartialUpdate(data, {
       firstName: "first_name",
       lastName: "last_name",
       email: "email",
-      city: "city",
-      country: "country",
+      lat: "lat",
+      lng: "lng",
       avatar: "avatar",
     });
 
@@ -220,8 +239,8 @@ class User {
                       first_name AS "firstName",
                       last_name AS "lastName",
                       email,
-                      city,
-                      country,
+                      lat,
+                      lng,
                       avatar`;
 
     const result = await db.query(querySql, [
@@ -232,6 +251,18 @@ class User {
 
     if (!user)
       throw new NotFoundError(`No user: ${username}`);
+
+    const userChildrenRes = await db.query(
+      `SELECT dob, gender
+          FROM children
+          WHERE parent_username = $1`,
+      [username]
+    );
+
+    user.children = userChildrenRes.rows.map((c) => ({
+      age: moment(c.dob).fromNow(true),
+      gender: c.gender,
+    }));
 
     delete user.password;
     return user;
@@ -270,20 +301,20 @@ class User {
 
     await db.query(
       `INSERT INTO children
-      (parent_username, age, gender)
+      (parent_username, dob, gender)
       VALUES ($1, $2, $3)`,
-      [username, data.age, data.gender]
+      [username, data.dob, data.gender]
     );
 
     const results = await db.query(
-      `SELECT age, gender
+      `SELECT dob, gender
       FROM children
       WHERE parent_username = $1`,
       [username]
     );
 
     const children = results.rows.map((c) => ({
-      age: c.age,
+      age: `${moment(c.dob).fromNow(true)} old`,
       gender: c.gender,
     }));
 
@@ -294,41 +325,41 @@ class User {
    * Returns undefined.
    * Returns NotFoundError if user or child is not found.
    */
-  static async editChild(username, data) {
-    const userCheck = await db.query(
-      `SELECT username
-    FROM users
-    WHERE username = $1`,
-      [username]
-    );
+  // static async editChild(username, data) {
+  //   const userCheck = await db.query(
+  //     `SELECT username
+  //   FROM users
+  //   WHERE username = $1`,
+  //     [username]
+  //   );
 
-    const user = userCheck.rows[0];
-    if (!user)
-      throw new NotFoundError(`No user: ${username}`);
+  //   const user = userCheck.rows[0];
+  //   if (!user)
+  //     throw new NotFoundError(`No user: ${username}`);
 
-    const { setCols, values } = sqlForPartialUpdate(data, {
-      age: "age",
-      gender: "gender",
-    });
+  //   const { setCols, values } = sqlForPartialUpdate(data, {
+  //     age: "age",
+  //     gender: "gender",
+  //   });
 
-    const usernameVarIdx = "$" + (values.length + 1);
+  //   const usernameVarIdx = "$" + (values.length + 1);
 
-    const querySql = `UPDATE children
-                    SET ${setCols}
-                    WHERE parent_username = ${usernameVarIdx}
-                    RETURNING age, gender`;
+  //   const querySql = `UPDATE children
+  //                   SET ${setCols}
+  //                   WHERE parent_username = ${usernameVarIdx}
+  //                   RETURNING age, gender`;
 
-    const result = await db.query(querySql, [
-      ...values,
-      username,
-    ]);
+  //   const result = await db.query(querySql, [
+  //     ...values,
+  //     username,
+  //   ]);
 
-    const child = result.rows[0];
-    if (!child)
-      throw new NotFoundError(
-        `No children found for ${username}`
-      );
-  }
+  //   const child = result.rows[0];
+  //   if (!child)
+  //     throw new NotFoundError(
+  //       `No children found for ${username}`
+  //     );
+  // }
 
   /** Make a friend: update db, returns friend(s)
    * - user_friending: user initiating friendship
@@ -432,7 +463,8 @@ class User {
     if (!place) throw new NotFoundError(`No place: ${id}`);
 
     const reviewsRes = await db.query(
-      `SELECT username,
+      `SELECT id, 
+                username,
                 bathroom,
                 changing_table,
                 highchair,
@@ -449,13 +481,16 @@ class User {
       user: r.username,
       content: {
         bathroom: r.bathroom,
-        "changing table": r.changing_table,
+        changingTable: r.changing_table,
         highchair: r.highchair,
         parking: r.parking,
-        "other notes": r.other_notes,
+        otherNotes: r.other_notes,
       },
       stars: r.stars,
-      date: r.timestamp,
+      date: moment(r.timestamp).format(
+        "dddd, MMMM Do YYYY, h:mm:ss a"
+      ),
+      id: r.id,
     }));
 
     return place;
@@ -510,6 +545,44 @@ class User {
     );
   }
 
+  /** Given a username return a list of saved places for that user. */
+  static async getUserPlaces(username) {
+    let userCheck = await db.query(
+      `SELECT username
+      FROM users
+      WHERE username = $1`,
+      [username]
+    );
+
+    let user = userCheck.rows[0];
+    if (!user)
+      throw new NotFoundError(`No user: ${username}`);
+
+    const results = await db.query(
+      `SELECT p.id, p.name, p.lat, p.lng, p.type
+      FROM users_places 
+      JOIN places AS p
+      ON users_places.place_id = p.id
+      WHERE users_places.username = $1`,
+      [username]
+    );
+
+    let resCheck = results.rows[0];
+    if (!resCheck)
+      throw new NotFoundError(
+        `No saved places for ${username}`
+      );
+
+    const places = results.rows.map((p) => ({
+      name: p.name,
+      lat: p.lat,
+      lng: p.lng,
+      id: p.id,
+      type: p.type,
+    }));
+
+    return places;
+  }
   /** Given a username and place_id remove the place from the users_places table in the database. Returns undefined or NotFoundError if place/user not found. */
   static async removeUserPlace(username, id) {
     let result = await db.query(
@@ -627,7 +700,7 @@ class User {
    */
   static async allDatesPlace(id) {
     let results = await db.query(
-      `SELECT username, place_id, date FROM dates
+      `SELECT username, place_id, TO_CHAR(date,'YYYY-MM-DD HH24:MI:SS') AS date FROM dates
       WHERE place_id = $1`,
       [id]
     );
@@ -681,7 +754,7 @@ class User {
    */
   static async allDatesUser(username) {
     let dateResults = await db.query(
-      `SELECT p.name, d.date 
+      `SELECT p.name, TO_CHAR(d.date,'YYYY-MM-DD HH24:MI:SS') AS date, p.id 
       FROM places AS p
       JOIN dates AS d
       ON p.id = d.place_id
@@ -695,6 +768,7 @@ class User {
         `No dates found for user: ${username}`
       );
 
+    console.log("dates from alldatesuser", dates);
     return dates;
   }
 
@@ -729,17 +803,18 @@ class User {
     const withUsers = results.rows.filter(
       (u) => u.username !== username
     );
+    console.log("WITH USERS BACKEND", withUsers);
 
     if (withUsers.length !== 0) {
       return {
-        where: `${place}`,
-        when: `${timestamp}`,
-        with: `${withUsers}`,
+        where: place,
+        when: timestamp,
+        with: withUsers,
       };
     } else {
       return {
-        where: `${place}`,
-        when: `${timestamp}`,
+        where: place,
+        when: timestamp,
       };
     }
   }

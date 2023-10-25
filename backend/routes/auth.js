@@ -34,6 +34,7 @@ router.post("/token", async function (req, res, next) {
       username,
       password
     );
+
     const token = createToken(user);
     return res.json({ token });
   } catch (err) {

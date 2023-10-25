@@ -6,29 +6,52 @@ import React, {
 import CurrUserContext from "./CurrUserContext";
 
 const FriendsList = () => {
-  const { currUser, getFriends, unfriend } =
+  const { currUserParsed, getFriends, unfriend } =
     useContext(CurrUserContext);
   const [friends, setFriends] = useState([]);
+  const [errors, setErrors] = useState([]);
 
   useEffect(() => {
     async function getFriendssOnMount() {
-      try {
-        const res = await getFriends(currUser.username);
-        setFriends(res);
-      } catch (err) {
-        console.log(err);
+      const res = await getFriends(currUserParsed.username);
+      if (!res.success) {
+        setErrors((errs) => [...errs, res.errors]);
+        return errors;
       }
+
+      setFriends(res.friends);
     }
     getFriendssOnMount();
-  }, [getFriends, currUser.username]);
+  }, [getFriends, currUserParsed.username, errors]);
 
-  const handleClick = (friend) => {
-    unfriend(friend);
+  const handleClick = async (friend) => {
+    const unfriendResult = unfriend(friend);
+    if (!unfriendResult.success) {
+      setErrors((errs) => [...errs, unfriendResult.errors]);
+      return errors;
+    }
     setFriends(friends.filter((f) => f !== friend));
+    return (
+      <alert>
+        <p>{unfriendResult.msg}</p>
+      </alert>
+    );
   };
 
   return (
     <div className="FriendsCardlist">
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       {friends.length !== 0 ? (
         <div className="list">
           <h3>Friends</h3>
@@ -46,11 +69,7 @@ const FriendsList = () => {
             ))}
           </ul>
         </div>
-      ) : (
-        <h4 className="mt-4 text-success">
-          <em>~ No friends ~</em>
-        </h4>
-      )}
+      ) : null}
     </div>
   );
 };

@@ -7,13 +7,11 @@ import { Link } from "react-router-dom";
 import "./HomePage.css";
 
 const HomePage = () => {
-  const { currUser } = useContext(currUserContext);
-  console.log("CURR USER", currUser);
-  const welcomeMsg = "PLAY, EXPLORE and MAKE FRIENDS!";
+  const { currUserParsed } = useContext(currUserContext);
 
   return (
     <div className="HomePage">
-      {currUser !== null ? (
+      {currUserParsed !== null ? (
         <div>
           <h1 className="text-dark">Playdate Buddy</h1>
           <div className="image-container">
@@ -42,7 +40,7 @@ const HomePage = () => {
               <h3 className="text-info">Make Friends</h3>
             </div>
           </div>
-          <h4>Welcome back, {currUser.username}!</h4>
+          <h4>Welcome back, {currUserParsed.username}!</h4>
           <Link
             to="/map"
             className="btn btn-primary fw-bold mx-2"

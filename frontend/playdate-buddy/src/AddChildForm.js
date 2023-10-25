@@ -4,11 +4,12 @@ import CurrUserContext from "./CurrUserContext";
 import "./AddChildForm.css";
 
 const AddChildForm = () => {
-  const { currUser, addChild, setCurrUser } =
+  const { currUserParsed, addChild, setCurrUser } =
     useContext(CurrUserContext);
   const INITAL_STATE = { gender: "", dob: "" };
   const navigate = useNavigate();
   const [formData, setFormData] = useState(INITAL_STATE);
+  const [errors, setErrors] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,11 +18,14 @@ const AddChildForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const children = await addChild(formData);
-
+    const childrenResult = await addChild(formData);
+    if (!childrenResult.success) {
+      setErrors((errs) => [...errs, childrenResult.errors]);
+      return errors;
+    }
     setCurrUser({
-      ...currUser,
-      children,
+      ...currUserParsed,
+      childrenResult,
     });
 
     setFormData(INITAL_STATE);
@@ -31,6 +35,18 @@ const AddChildForm = () => {
   return (
     <div>
       <h3 className="text-dark">Add a child</h3>
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       <form
         onSubmit={handleSubmit}
         className="add-child-form"

@@ -3,7 +3,8 @@ import { NavLink } from "react-router-dom";
 import CurrUserContext from "./CurrUserContext";
 
 const Navbar = () => {
-  const { currUser, logout } = useContext(CurrUserContext);
+  const { currUserParsed, logout } =
+    useContext(CurrUserContext);
 
   return (
     <nav
@@ -19,7 +20,7 @@ const Navbar = () => {
         </i>
         Playdate Buddy
       </NavLink>
-      {currUser !== null ? (
+      {currUserParsed !== null ? (
         <div className="collapse navbar-collapse">
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
             <li className="nav-item mx-2">
@@ -33,9 +34,6 @@ const Navbar = () => {
             </li>
             <li className="nav-item mx-2">
               <NavLink to="/dates">Dates</NavLink>
-            </li>
-            <li className="nav-item mx-2">
-              <NavLink to="/chats">Chats</NavLink>
             </li>
             <li className="nav-item mx-2">
               <NavLink to="/profile">Profile</NavLink>

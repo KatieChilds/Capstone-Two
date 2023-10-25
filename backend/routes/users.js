@@ -13,7 +13,6 @@ const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
 const userUpdateSchema = require("../schemas/userUpdate.json");
 const newChildSchema = require("../schemas/newChildSchema.json");
-const updateChildSchema = require("../schemas/updateChildSchema.json");
 const reviewNew = require("../schemas/reviewNew.json");
 const dateNew = require("../schemas/dateNew.json");
 const { findPlace } = require("../helpers/placesAPI");
@@ -76,12 +75,12 @@ router.patch(
         const errs = validator.errors.map((e) => e.stack);
         throw new BadRequestError(errs);
       }
-      console.log("PATCH REQ BODY", req.body);
+
       const user = await User.update(
         req.params.username,
         req.body
       );
-      console.log("PATCH user", user);
+
       return res.json({ user });
     } catch (err) {
       return next;
@@ -133,37 +132,6 @@ router.post(
     }
   }
 );
-
-/** PATCH /[username]/children/edit {child} => {child}
- * Data can include age and gender of a child for the logged in user.
- * Returns: {updated: child info for username}
- * Authorization: same user as username
- */
-// router.patch(
-//   "/:username/children/edit",
-//   ensureCorrectUser,
-//   async function (req, res, next) {
-//     try {
-//       const validator = jsonschema.validate(
-//         req.body,
-//         updateChildSchema
-//       );
-
-//       if (!validator.valid) {
-//         const errs = validator.errors.map((e) => e.stack);
-//         throw new BadRequestError(errs);
-//       }
-
-//       await User.editChild(req.params.username, req.body);
-
-//       return res.json({
-//         updated: `child info for ${req.params.username}`,
-//       });
-//     } catch (err) {
-//       return next(err);
-//     }
-//   }
-// );
 
 /** POST /[username]/friends/[user_friended]/add {friend} =>
  * {friended: user_friended}
@@ -228,7 +196,7 @@ router.delete(
   }
 );
 
-/** GET /place => {places: [{id, name, address, type}, ...]}
+/** POST /place => {places: [{place_id, name, address, type}, ...]}
  * Returns: Top place matching search term from Google Places API. Adds top matching place to database.
  * Authorization required: logged in user
  */
@@ -237,7 +205,6 @@ router.post(
   ensureLoggedIn,
   async function (req, res, next) {
     try {
-      console.log(req.body);
       const place = await findPlace(req.body.searchName);
       return res.json({ place });
     } catch (err) {
@@ -247,8 +214,8 @@ router.post(
 );
 
 /** GET /places/[id] => {place}
- * Returns: {id, name, city, country, type, reviews}
- *    where reviews is: [{user_username, content, stars},...]
+ * Returns: {name, address, type, reviews}
+ *    where reviews is: [{username, bathroom, changingTable, highchair, parking, otherNotes, stars},...]
  * Authorization required: logged in user
  */
 router.get(
@@ -461,16 +428,13 @@ router.get(
   ensureCorrectUser,
   async function (req, res, next) {
     try {
-      console.log("REQ PARAMS", req.params);
       const { username, id } = req.params;
       const { timestamp } = req.query;
-      console.log("TIMESTAMP IN BACKEND ROUTE", timestamp);
       const date = await User.getDate(
         username,
         id,
         timestamp
       );
-      console.log("DATE WITH RETURNING:", date.with);
       return res.json({ date });
     } catch (err) {
       return next(err);
@@ -507,8 +471,6 @@ router.delete(
     try {
       const { username, id } = req.params;
       const { timestamp } = req.body;
-      console.log("TIMESTAMP in backend ROUTE", timestamp);
-      console.log("REQ BODY", req.body);
       await User.cancelDate(username, id, timestamp);
       return res.json({
         Cancelled: `Date for ${username} at ${id} at ${timestamp}`,

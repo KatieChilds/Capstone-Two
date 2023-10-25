@@ -9,31 +9,33 @@ const axios = require("axios");
 const db = require("../db.js");
 
 async function addPlace(place) {
-  let newPlace = await db.query(
-    `INSERT INTO places
-          (id, name, address, lat, lng, type)
-          VALUES ($1, $2, $3, $4, $5, $6)
-          RETURNING id, name, address, lat, lng, type`,
-    [
-      place.place_id,
-      place.name,
-      place.address,
-      place.lat,
-      place.lng,
-      place.type,
-    ]
-  );
-  return newPlace.rows[0];
+  try {
+    let newPlace = await db.query(
+      `INSERT INTO places
+            (id, name, address, lat, lng, type)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id, name, address, lat, lng, type`,
+      [
+        place.place_id,
+        place.name,
+        place.address,
+        place.lat,
+        place.lng,
+        place.type,
+      ]
+    );
+    return newPlace.rows[0];
+  } catch (err) {
+    console.log("insertion FAILED: ", err);
+  }
 }
 
 async function googlePlacesAPICall(searchName) {
-  console.log("PLACES API SEARCHNAME", searchName);
   const term = searchName.replaceAll(" ", "%2C").trim();
-  console.log("TERM", term);
   const result = await axios.get(
     `${GOOGLE_PLACES_API_BASE_URL}${term}&inputtype=textquery&key=${GOOGLE_API_KEY}`
   );
-  if (result.data.candidates != []) {
+  if (result.data.candidates.length !== 0) {
     const { name, place_id, formatted_address } =
       result.data.candidates[0];
     const { lat, lng } =
@@ -50,6 +52,7 @@ async function googlePlacesAPICall(searchName) {
 
     return place;
   }
+
   throw new NotFoundError(
     `No search results found for ${searchName}`
   );
@@ -60,7 +63,7 @@ async function googlePlaceDetailsAPICall(id) {
     `${GOOGLE_PLACES_DETAILS_API_BASE_URL}${id}&key=${GOOGLE_API_KEY}`
   );
 
-  if (result.data.result != {}) {
+  if (Object.keys(result.data.result).length !== 0) {
     const { name, place_id, formatted_address } =
       result.data.result;
     const { lat, lng } =
@@ -77,27 +80,34 @@ async function googlePlaceDetailsAPICall(id) {
 
     return place;
   }
+
   throw new NotFoundError(
-    `No search results found for ${searchName}`
+    `No search results found for ${id}`
   );
 }
 
 async function findPlace(searchName) {
-  console.log(searchName);
   let placeInfo = await googlePlacesAPICall(searchName);
 
   let placeCheck = await db.query(
-    `SELECT id, name, address, lat, lng, type
+    `SELECT id AS place_id, name, address, lat, lng, type
       FROM places
       WHERE id = $1`,
     [placeInfo.place_id]
   );
 
   let place = placeCheck.rows[0];
+
   if (!place) {
     let newPlace = await addPlace(placeInfo);
+    newPlace.lat = +newPlace.lat;
+    newPlace.lng = +newPlace.lng;
+
     return newPlace;
   }
+
+  place.lat = +place.lat;
+  place.lng = +place.lng;
   return place;
 }
 
@@ -112,10 +122,12 @@ async function findPlaceFromId(id) {
   );
 
   let place = placeCheck.rows[0];
+
   if (!place) {
     let newPlace = await addPlace(placeInfo);
     return newPlace;
   }
+
   return place;
 }
 

@@ -5,55 +5,66 @@ import React, {
 } from "react";
 import UserCard from "./UserCard";
 import CurrUserContext from "./CurrUserContext";
-import SearchForm from "./SearchForm";
-import axios from "axios";
+// import SearchForm from "./SearchForm";
+// import axios from "axios";
 
-const BASE_URL =
-  process.env.REACT_APP_BASE_URL || "http://localhost:3001";
+// const BASE_URL =
+//   process.env.REACT_APP_BASE_URL || "http://localhost:3001";
 
 const UsersCardList = () => {
-  const { currUser, getUsers, token } =
+  const { currUserParsed, getUsers } =
     useContext(CurrUserContext);
   const [users, setUsers] = useState([]);
-  const headers = {
-    Authorization: `Bearer ${token}`,
-  };
+  const [errors, setErrors] = useState([]);
+  // const headers = {
+  //   Authorization: `Bearer ${token}`,
+  // };
 
   useEffect(() => {
     async function getUsersOnMount() {
-      try {
-        const res = await getUsers();
-        console.log("RES", res);
-        const filteredUsers = res.filter(
-          (user) => user.username !== currUser.username
-        );
-        setUsers(filteredUsers);
-      } catch (err) {
-        console.log(err);
+      const res = await getUsers();
+      if (!res.success) {
+        setErrors((errs) => [...errs, res.errors]);
+        return errors;
       }
+      const filteredUsers = res.users.filter(
+        (user) => user.username !== currUserParsed.username
+      );
+      setUsers(filteredUsers);
     }
     getUsersOnMount();
-  }, [getUsers, currUser.username]);
+  }, [getUsers, currUserParsed.username, errors]);
 
-  async function searchFor(searchObj) {
-    const res = await axios.get(
-      `${BASE_URL}/users`,
-      searchObj,
-      { headers: headers }
-    );
-    const usersRes = res.filter(
-      (user) => user.username !== currUser.username
-    );
-    setUsers(usersRes);
-  }
+  // async function searchFor(searchObj) {
+  //   const res = await axios.get(
+  //     `${BASE_URL}/users`,
+  //     searchObj,
+  //     { headers: headers }
+  //   );
+  //   if (!res.success) {
+  //     setErrors((errs) => [...errs, res.errors]);
+  //     return errors;
+  //   }
+  //   const usersRes = res.filter(
+  //     (user) => user.username !== currUserParsed.username
+  //   );
+  //   setUsers(usersRes);
+  // }
 
-  console.log("USERS", users);
   return (
     <div className="UsersCardlist">
-      <SearchForm
-        keyVal="gender"
-        searchFor={searchFor}
-      />
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       {users.length !== 0 ? (
         <div className="List">
           {users.map((user) => (
@@ -63,11 +74,7 @@ const UsersCardList = () => {
             />
           ))}
         </div>
-      ) : (
-        <h4 className="mt-4 text-success">
-          <em>~ No users ~</em>
-        </h4>
-      )}
+      ) : null}
     </div>
   );
 };

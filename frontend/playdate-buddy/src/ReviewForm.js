@@ -15,6 +15,7 @@ const ReviewForm = () => {
     stars: 0,
   };
   const [formData, setFormData] = useState(INITIAL_STATE);
+  const [errors, setErrors] = useState([]);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -29,16 +30,31 @@ const ReviewForm = () => {
     setFormData((fData) => ({ ...fData, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("FORM DATA", formData);
-    leaveReview(id, formData);
+    const reviewResult = await leaveReview(id, formData);
+    if (!reviewResult.success) {
+      setErrors((errs) => [...errs, reviewResult.errors]);
+      return errors;
+    }
     setFormData(INITIAL_STATE);
     navigate(`/places/${id}`);
   };
 
   return (
     <div className="reviewForm-container">
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       <form
         className="reviewForm"
         onSubmit={handleSubmit}

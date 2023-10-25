@@ -1,4 +1,8 @@
-import React, { useContext, useEffect } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import CurrUserContext from "./CurrUserContext";
 import { Link, useNavigate } from "react-router-dom";
 import ProfilePhotoCard from "./ProfilePhotoCard";
@@ -6,42 +10,52 @@ import { v4 as uuid } from "uuid";
 import "./ProfilePage.css";
 
 const ProfilePage = () => {
-  const { currUser, deleteUser } =
+  const { currUserParsed, deleteUser } =
     useContext(CurrUserContext);
+  const [errors, setErrors] = useState([]);
   const navigate = useNavigate();
 
-  const handleDelete = () => {
-    deleteUser();
+  const handleDelete = async () => {
+    const deleteResult = await deleteUser();
+    if (!deleteResult.success) {
+      setErrors((errs) => [...errs, deleteResult.errors]);
+      return errors;
+    }
     navigate("/");
+    return (
+      <alert>
+        <p>deleteResult.msg</p>
+      </alert>
+    );
   };
 
-  useEffect(() => {}, [currUser]);
+  useEffect(() => {}, [currUserParsed]);
 
   return (
     <div>
-      <h3>{currUser.username}'s Profile</h3>
+      <h3>{currUserParsed.username}'s Profile</h3>
       <ProfilePhotoCard />
       <table className="table user-info">
         <tbody>
           <tr className="table-light">
             <th>First Name</th>
-            <td>{currUser.firstName}</td>
+            <td>{currUserParsed.firstname}</td>
           </tr>
           <tr className="table-light">
             <th>Last Name</th>
-            <td>{currUser.lastName}</td>
+            <td>{currUserParsed.lastname}</td>
           </tr>
           <tr className="table-light">
             <th>Email</th>
-            <td>{currUser.email}</td>
+            <td>{currUserParsed.email}</td>
           </tr>
         </tbody>
       </table>
-      {currUser.children.length !== 0 ? (
+      {currUserParsed.children.length !== 0 ? (
         <div className="children-info">
           <h5>Children</h5>
           <ol>
-            {currUser.children.map((c) => (
+            {currUserParsed.children.map((c) => (
               <li key={uuid()}>
                 {c.age}, {c.gender}
               </li>
@@ -68,6 +82,18 @@ const ProfilePage = () => {
       >
         <strong>Delete Account</strong>
       </button>
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 };

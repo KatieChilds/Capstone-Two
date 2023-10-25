@@ -1,9 +1,8 @@
 import React, { useContext } from "react";
 import CurrUserContext from "./CurrUserContext";
-import { useParams } from "react-router-dom";
 
 const ReviewsCard = ({ review, handleDelete }) => {
-  const { currUser } = useContext(CurrUserContext);
+  const { currUserParsed } = useContext(CurrUserContext);
   const content = review.content;
   const numStars = review.stars;
 
@@ -59,7 +58,7 @@ const ReviewsCard = ({ review, handleDelete }) => {
             <p>Other Notes: {content.otherNotes}</p>
           </small>
         </div>
-        {currUser.username === review.user ? (
+        {currUserParsed.username === review.user ? (
           <button
             className="btn btn-danger btn-sm"
             onClick={() => handleDelete(review.user)}

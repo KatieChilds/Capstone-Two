@@ -10,23 +10,24 @@ const BASE_URL =
   process.env.REACT_APP_BASE_URL || "http://localhost:3001";
 
 const ProfileForm = () => {
-  const { currUser, setCurrUser, token } =
+  const { currUserParsed, setCurrUser, token } =
     useContext(CurrUserContext);
   const headers = {
     Authorization: `Bearer ${token}`,
   };
   const navigate = useNavigate();
   const INITIAL_STATE = {
-    username: currUser.username,
+    username: currUserParsed.username,
     password: "",
-    firstName: currUser.firstname,
-    lastName: currUser.lastname,
-    email: currUser.email,
+    firstName: currUserParsed.firstname,
+    lastName: currUserParsed.lastname,
+    email: currUserParsed.email,
     city: "",
     country: "",
-    avatar: currUser.avatar,
+    avatar: currUserParsed.avatar,
   };
   const [formData, setFormData] = useState(INITIAL_STATE);
+  const [errors, setErrors] = useState([]);
   const countryChoices = countries;
 
   const handleChange = (e) => {
@@ -44,20 +45,44 @@ const ProfileForm = () => {
       }
       delete formData.username;
       let user = await axios.patch(
-        `${BASE_URL}/users/${currUser.username}`,
+        `${BASE_URL}/users/${currUserParsed.username}`,
         { ...formData },
         { headers: headers }
       );
-      console.log("updated USER", user);
-      setCurrUser(user.data.user);
+
+      setCurrUser(JSON.stringify(user.data.user));
       navigate("/profile");
     } catch (err) {
-      console.log(err);
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        setErrors((e) => [...e, errs]);
+        return errors;
+      } else {
+        setErrors((e) => [
+          ...e,
+          err.response.data.error.message,
+        ]);
+        return errors;
+      }
     }
   };
 
   return (
     <div className="form-container">
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       <form
         className="authForm"
         onSubmit={handleSubmit}
@@ -99,14 +124,14 @@ const ProfileForm = () => {
           <div className="form-floating mb-3">
             <input
               type="text"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
+              id="firstname"
+              name="firstname"
+              value={formData.firstname}
               onChange={handleChange}
               className="form-control"
             />
             <label
-              htmlFor="firstName"
+              htmlFor="firstname"
               className="form-label"
             >
               First Name
@@ -115,14 +140,14 @@ const ProfileForm = () => {
           <div className="form-floating mb-3">
             <input
               type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
+              id="lastname"
+              name="lastname"
+              value={formData.lastname}
               onChange={handleChange}
               className="form-control"
             />
             <label
-              htmlFor="lastName"
+              htmlFor="lastname"
               className="form-label"
             >
               Last Name

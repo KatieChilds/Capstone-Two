@@ -1,4 +1,8 @@
-import React, { useState, useContext } from "react";
+import React, {
+  useState,
+  useContext,
+  useEffect,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import CurrUserContext from "./CurrUserContext";
 import countries from "./static/countries";
@@ -11,8 +15,8 @@ const SignupForm = () => {
   const INITAL_STATE = {
     username: "",
     password: "",
-    firstName: "",
-    lastName: "",
+    firstname: "",
+    lastname: "",
     email: "",
     city: "",
     country: "",
@@ -20,6 +24,7 @@ const SignupForm = () => {
   };
 
   const [formData, setFormData] = useState(INITAL_STATE);
+  const [errors, setErrors] = useState([]);
   const { signup } = useContext(CurrUserContext);
 
   const handleChange = (e) => {
@@ -27,18 +32,36 @@ const SignupForm = () => {
     setFormData((fData) => ({ ...fData, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    signup(formData);
+    const signupResult = await signup(formData);
+    if (!signupResult.success) {
+      setErrors((errs) => [...errs, signupResult.errors]);
+      return errors;
+    }
     setFormData(INITAL_STATE);
     navigate("/");
   };
+
+  useEffect(() => {}, [errors]);
 
   return (
     <div className="form-container">
       <h3 className="text-info">
         Complete the form below to signup
       </h3>
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       <form
         className="AuthForm"
         onSubmit={handleSubmit}
@@ -79,14 +102,14 @@ const SignupForm = () => {
           <div className="form-floating mb-3">
             <input
               type="text"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
+              id="firstname"
+              name="firstname"
+              value={formData.firstname}
               onChange={handleChange}
               className="form-control"
             />
             <label
-              htmlFor="firstName"
+              htmlFor="firstname"
               className="form-label"
             >
               First Name
@@ -95,14 +118,14 @@ const SignupForm = () => {
           <div className="form-floating mb-3">
             <input
               type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
+              id="lastname"
+              name="lastname"
+              value={formData.lastname}
               onChange={handleChange}
               className="form-control"
             />
             <label
-              htmlFor="lastName"
+              htmlFor="lastname"
               className="form-label"
             >
               Last Name

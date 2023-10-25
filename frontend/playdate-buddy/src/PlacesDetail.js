@@ -21,7 +21,7 @@ const PlacesDetail = () => {
     token,
     savePlace,
     makeDate,
-    currUser,
+    currUserParsed,
     removeReview,
   } = useContext(CurrUserContext);
   const [place, setPlace] = useState({});
@@ -31,6 +31,7 @@ const PlacesDetail = () => {
   const [click, setClick] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const [reviewDeleted, setReviewDeleted] = useState(false);
+  const [errors, setErrors] = useState([]);
   const headers = useMemo(
     () => ({
       Authorization: `Bearer ${token}`,
@@ -40,8 +41,6 @@ const PlacesDetail = () => {
 
   useEffect(() => {
     fetchPlace();
-    console.log("place loaded?", placeLoaded);
-    console.log("PLACE on mount", place);
   }, []);
 
   async function fetchPlace() {
@@ -51,18 +50,19 @@ const PlacesDetail = () => {
         { headers: headers }
       );
       setPlace(res.data.place);
-      console.log(
-        "results in fetch place are:",
-        res.data.place
-      );
       setPlaceLoaded(true);
-      console.log(
-        "place loaded in fetch place?",
-        placeLoaded
-      );
-      console.log("PLACE in fetch place", place);
     } catch (err) {
-      console.log(err);
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        setErrors((e) => [...e, errs]);
+      } else {
+        setErrors((e) => [
+          ...e,
+          err.response.data.error.message,
+        ]);
+      }
     }
     try {
       let dateRes = await axios.get(
@@ -71,7 +71,19 @@ const PlacesDetail = () => {
       );
       setDates(dateRes.data.dates);
     } catch (err) {
-      console.log(err);
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        setErrors((e) => [...e, ...errs]);
+        return errors;
+      } else {
+        setErrors((e) => [
+          ...e,
+          err.response.data.error.message,
+        ]);
+        return errors;
+      }
     }
   }
 
@@ -85,9 +97,19 @@ const PlacesDetail = () => {
     setDisabled(false);
   }, [disabled]);
 
-  const handleSave = async (e) => {
-    savePlace(id);
+  const handleSave = async () => {
+    const savePlaceRes = await savePlace(id);
+    if (!savePlaceRes.success) {
+      setErrors((errs) => [...errs, savePlaceRes.errors]);
+      console.log(savePlaceRes.errors);
+      return errors;
+    }
     setSavedStatus(true);
+    return (
+      <alert>
+        <p>{savePlaceRes.msg}</p>
+      </alert>
+    );
   };
 
   const handleClick = () => {
@@ -95,17 +117,49 @@ const PlacesDetail = () => {
   };
 
   const handleJoin = async (date) => {
-    await makeDate(id, date);
+    const dateResult = await makeDate(id, date);
+    if (!dateResult.success) {
+      setErrors((errs) => [...errs, dateResult.errors]);
+      return errors;
+    }
     setDisabled(true);
+    return (
+      <alert>
+        <p>{dateResult.msg}</p>
+      </alert>
+    );
   };
 
-  const handleDelete = (username) => {
-    removeReview(username, id);
+  const handleDelete = async (username) => {
+    const reviewResult = await removeReview(username, id);
+    if (!reviewResult.success) {
+      setErrors((errs) => [...errs, reviewResult.errors]);
+      return errors;
+    }
     setReviewDeleted(true);
+    return (
+      <alert>
+        <p>{reviewResult.msg}</p>
+      </alert>
+    );
   };
+
+  useEffect(() => {}, [errors]);
 
   return (
     <div className="placesDetails">
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       {placeLoaded ? (
         <div className="place-container">
           <div className="card border-info mb-3">
@@ -175,7 +229,7 @@ const PlacesDetail = () => {
                       className="btn btn-warning"
                       onClick={() => handleJoin(date.date)}
                       disabled={
-                        currUser.username ===
+                        currUserParsed.username ===
                           date.username || disabled
                       }
                     >

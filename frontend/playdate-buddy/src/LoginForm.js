@@ -7,6 +7,7 @@ const LoginForm = () => {
   let navigate = useNavigate();
   const INITIAL_STATE = { username: "", password: "" };
   const [formData, setFormData] = useState(INITIAL_STATE);
+  const [errors, setErrors] = useState([]);
   const { login } = useContext(CurrUserContext);
 
   const handleChange = (e) => {
@@ -14,9 +15,13 @@ const LoginForm = () => {
     setFormData((fData) => ({ ...fData, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login(formData);
+    const loginResult = await login(formData);
+    if (!loginResult.success) {
+      setErrors((errs) => [...errs, loginResult.errors]);
+      return errors;
+    }
     setFormData(INITIAL_STATE);
     navigate("/");
   };
@@ -24,6 +29,18 @@ const LoginForm = () => {
   return (
     <div className="form-container">
       <h3 className="text-info">Login below</h3>
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       <form
         className="AuthForm"
         onSubmit={handleSubmit}

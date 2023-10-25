@@ -13,12 +13,12 @@
         "minLength": 5,
         "maxLength": 20
       },
-      "firstName": {
+      "firstname": {
         "type": "string",
         "minLength": 1,
         "maxLength": 30
       },
-      "lastName": {
+      "lastname": {
         "type": "string",
         "minLength": 1,
         "maxLength": 30
@@ -44,8 +44,8 @@
     "additionalProperties": false,
     "required": [
       "username",
-      "firstName",
-      "lastName",
+      "firstname",
+      "lastname",
       "password",
       "email",
       "city",

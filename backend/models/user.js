@@ -7,6 +7,7 @@ const { sqlForPartialUpdate } = require("../helpers/sql");
 const {
   findPlace,
   findPlaceFromId,
+  addPlace,
 } = require("../helpers/placesAPI");
 const {
   NotFoundError,
@@ -23,8 +24,8 @@ class User {
     const result = await db.query(
       `SELECT username,
                     password,
-                    first_name AS firstName,
-                    last_name AS lastName,
+                    first_name AS firstname,
+                    last_name AS lastname,
                     email,
                     lat,
                     lng,
@@ -55,8 +56,8 @@ class User {
   static async register({
     username,
     password,
-    firstName,
-    lastName,
+    firstname,
+    lastname,
     email,
     city,
     country,
@@ -81,7 +82,10 @@ class User {
       BCRYPT_WORK_FACTOR
     );
 
-    const place = await findPlace(`${city} ${country}`);
+    const place = await findPlace(
+      `${city} ${country}`,
+      addPlace
+    );
     const lat = place.lat;
     const lng = place.lng;
 
@@ -97,12 +101,12 @@ class User {
                 avatar,
                 token)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING username, first_name AS "firstName", last_name AS "lastName", email, lat, lng, avatar, token AS access_token`,
+        RETURNING username, first_name AS "firstname", last_name AS "lastname", email, lat, lng, avatar, token AS access_token`,
       [
         username,
         hashedPassword,
-        firstName,
-        lastName,
+        firstname,
+        lastname,
         email,
         lat,
         lng,
@@ -112,7 +116,7 @@ class User {
     );
 
     const user = result.rows[0];
-    console.log("USER - register from model", user);
+
     return user;
   }
 
@@ -120,7 +124,7 @@ class User {
    * Returns [{username, firstName}] */
   static async findUsers({ minAge, maxAge, gender } = {}) {
     let query = `SELECT u.username, 
-                u.first_name AS firstName, u.avatar
+                u.first_name AS firstname, u.avatar
                 FROM users AS u
                 LEFT JOIN children AS c
                 ON u.username = c.parent_username`;
@@ -147,18 +151,9 @@ class User {
       );
     }
 
-    // queryValues.push(city);
-    // whereExpressions.push(`city = $${queryValues.length}`);
-    // queryValues.push(country);
-    // whereExpressions.push(
-    //   `country = $${queryValues.length}`
-    // );
     if (whereExpressions.length !== 0) {
       query += " WHERE " + whereExpressions.join(" AND ");
     }
-
-    console.log(query);
-    console.log(queryValues);
 
     // Finalize query
     query += " GROUP BY username";
@@ -169,7 +164,7 @@ class User {
   //   Given a username, return info for that user, including info about children: {age, gender}. Throws NotFoundError if user not found.
   static async get(username) {
     const userRes = await db.query(
-      `SELECT username, first_name AS firstName, last_name AS lastName, email, lat, lng, avatar
+      `SELECT username, first_name AS firstname, last_name AS lastname, email, lat, lng, avatar
         FROM users
         WHERE username = $1`,
       [username]
@@ -192,7 +187,6 @@ class User {
       gender: c.gender,
     }));
 
-    console.log("BACKEND USER", user);
     return user;
   }
 
@@ -202,7 +196,6 @@ class User {
    * Throws NotFoundError if user not found
    */
   static async update(username, data) {
-    console.log("DATA", data);
     if (data.password) {
       data.password = await bcrypt.hash(
         data.password,
@@ -222,8 +215,8 @@ class User {
     }
 
     const { setCols, values } = sqlForPartialUpdate(data, {
-      firstName: "first_name",
-      lastName: "last_name",
+      firstname: "first_name",
+      lastname: "last_name",
       email: "email",
       lat: "lat",
       lng: "lng",
@@ -236,8 +229,8 @@ class User {
                       SET ${setCols}
                       WHERE username = ${usernameVarIdx}
                       RETURNING username,
-                      first_name AS "firstName",
-                      last_name AS "lastName",
+                      first_name AS "firstname",
+                      last_name AS "lastname",
                       email,
                       lat,
                       lng,
@@ -321,46 +314,6 @@ class User {
     return children;
   }
 
-  /** Update child information. Given a username and data make a partial update to the information of a user's child.
-   * Returns undefined.
-   * Returns NotFoundError if user or child is not found.
-   */
-  // static async editChild(username, data) {
-  //   const userCheck = await db.query(
-  //     `SELECT username
-  //   FROM users
-  //   WHERE username = $1`,
-  //     [username]
-  //   );
-
-  //   const user = userCheck.rows[0];
-  //   if (!user)
-  //     throw new NotFoundError(`No user: ${username}`);
-
-  //   const { setCols, values } = sqlForPartialUpdate(data, {
-  //     age: "age",
-  //     gender: "gender",
-  //   });
-
-  //   const usernameVarIdx = "$" + (values.length + 1);
-
-  //   const querySql = `UPDATE children
-  //                   SET ${setCols}
-  //                   WHERE parent_username = ${usernameVarIdx}
-  //                   RETURNING age, gender`;
-
-  //   const result = await db.query(querySql, [
-  //     ...values,
-  //     username,
-  //   ]);
-
-  //   const child = result.rows[0];
-  //   if (!child)
-  //     throw new NotFoundError(
-  //       `No children found for ${username}`
-  //     );
-  // }
-
   /** Make a friend: update db, returns friend(s)
    * - user_friending: user initiating friendship
    * - user_friended: user being friended
@@ -376,7 +329,7 @@ class User {
 
     const user = preCheck.rows[0];
     if (!user)
-      throw new NotFoundError(`No user: ${username}`);
+      throw new NotFoundError(`No user: ${user_friending}`);
 
     let preCheck2 = await db.query(
       `SELECT username
@@ -519,6 +472,7 @@ class User {
     );
 
     let place = placeCheck.rows[0];
+
     if (!place) {
       // If place not in database, make API call to Google Places API to get place info and save to database.
       await findPlaceFromId(id);
@@ -575,8 +529,8 @@ class User {
 
     const places = results.rows.map((p) => ({
       name: p.name,
-      lat: p.lat,
-      lng: p.lng,
+      lat: +p.lat,
+      lng: +p.lng,
       id: p.id,
       type: p.type,
     }));
@@ -768,7 +722,6 @@ class User {
         `No dates found for user: ${username}`
       );
 
-    console.log("dates from alldatesuser", dates);
     return dates;
   }
 
@@ -803,7 +756,6 @@ class User {
     const withUsers = results.rows.filter(
       (u) => u.username !== username
     );
-    console.log("WITH USERS BACKEND", withUsers);
 
     if (withUsers.length !== 0) {
       return {

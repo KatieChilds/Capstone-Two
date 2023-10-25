@@ -8,26 +8,36 @@ import CurrUserContext from "./CurrUserContext";
 
 const DateDetails = () => {
   const { id, date } = useParams();
-  console.log("ID", id);
-  console.log("date", date);
   const { getDateInfo } = useContext(CurrUserContext);
   const [dateInfo, setDateInfo] = useState({});
+  const [errors, setErrors] = useState([]);
 
   useEffect(() => {
     async function getDateDetailsOnMount() {
-      try {
-        const dateRes = await getDateInfo(id, date);
-        setDateInfo(dateRes.data.date);
-      } catch (err) {
-        console.log(err);
+      const dateRes = await getDateInfo(id, date);
+      if (!dateRes.success) {
+        setErrors((errs) => [...errs, dateRes.errors]);
+        return errors;
       }
+      setDateInfo(dateRes.date);
     }
     getDateDetailsOnMount();
-  }, []);
+  }, [date, errors, getDateInfo, id]);
 
-  console.log(dateInfo);
   return (
     <div>
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       <h5>Date Info:</h5>
       <p>Where: {dateInfo.where}</p>
       <p>When: {dateInfo.when}</p>

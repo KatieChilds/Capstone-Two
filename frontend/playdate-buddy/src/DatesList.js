@@ -13,6 +13,7 @@ const DatesList = () => {
     useContext(CurrUserContext);
   const [dates, setDates] = useState([]);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [errors, setErrors] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,12 +21,12 @@ const DatesList = () => {
   }, []);
 
   async function getDatesOnMount() {
-    try {
-      const dateResults = await getDates();
-      setDates(dateResults);
-    } catch (err) {
-      console.log(err);
+    const dateResults = await getDates();
+    if (!dateResults.success) {
+      setErrors((errs) => [...errs, dateResults.errors]);
+      return errors;
     }
+    setDates(dateResults.dates);
   }
 
   useEffect(() => {
@@ -40,8 +41,17 @@ const DatesList = () => {
   };
 
   const handleCancel = async (id, date) => {
-    await cancelDate(id, date);
+    const cancelResult = await cancelDate(id, date);
+    if (!cancelResult.success) {
+      setErrors((errs) => [...errs, cancelResult.errors]);
+      return errors;
+    }
     setIsDeleted(true);
+    return (
+      <alert>
+        <p>{cancelResult.msg}</p>
+      </alert>
+    );
   };
 
   const formatDate = (date) => {
@@ -52,6 +62,18 @@ const DatesList = () => {
 
   return (
     <div>
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       {dates.length !== 0 ? (
         <>
           {dates.map((date) => (
@@ -87,9 +109,7 @@ const DatesList = () => {
             </div>
           ))}
         </>
-      ) : (
-        <p>No playdates made</p>
-      )}
+      ) : null}
     </div>
   );
 };

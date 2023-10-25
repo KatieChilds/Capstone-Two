@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import CurrUserContext from "./CurrUserContext";
 import useLocalStorage from "./useLocalStorage";
 import jwt from "jsonwebtoken";
@@ -7,9 +7,12 @@ import axios from "axios";
 const BASE_URL =
   process.env.REACT_APP_BASE_URL || "http://localhost:3001";
 const TOKEN_STORAGE_ID = "playdate-buddy-token";
+const USER_STORAGE_ID = "playdate-buddy-user";
 
 const CurrUserProvider = ({ children }) => {
-  const [currUser, setCurrUser] = useState(null);
+  const [currUser, setCurrUser] =
+    useLocalStorage(USER_STORAGE_ID);
+  const currUserParsed = JSON.parse(currUser);
   const [token, setToken] = useLocalStorage(
     TOKEN_STORAGE_ID
   );
@@ -21,15 +24,29 @@ const CurrUserProvider = ({ children }) => {
   );
 
   const login = async (user) => {
-    const res = await axios.post(
-      `${BASE_URL}/auth/token`,
-      {
-        ...user,
-      },
-      { headers: headers }
-    );
-    setToken(res.data.token);
-    setCurrUser(user);
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/auth/token`,
+        {
+          ...user,
+        },
+        { headers: headers }
+      );
+      setToken(res.data.token);
+      return { success: true };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   useEffect(
@@ -49,24 +66,54 @@ const CurrUserProvider = ({ children }) => {
               access_token,
             };
 
-            setCurrUser(userInfo);
+            setCurrUser(JSON.stringify(userInfo));
           } catch (err) {
-            setCurrUser(null);
+            if (
+              Array.isArray(err.response.data.error.message)
+            ) {
+              const errs =
+                err.response.data.error.message.map(
+                  (e) => e
+                );
+              setCurrUser(null);
+              return { success: false, errors: errs };
+            } else {
+              setCurrUser(null);
+              return {
+                success: false,
+                errors: err.response.data.error.message,
+              };
+            }
           }
         }
       }
       getCurrentUser();
     },
-    [token, headers]
+    [token, headers, setCurrUser]
   );
 
   const signup = async (user) => {
-    const res = await axios.post(
-      `${BASE_URL}/auth/register`,
-      { ...user },
-      { headers: headers }
-    );
-    setToken(res.data.token);
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/auth/register`,
+        { ...user },
+        { headers: headers }
+      );
+      setToken(res.data.token);
+      return { success: true };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const logout = () => {
@@ -75,142 +122,346 @@ const CurrUserProvider = ({ children }) => {
   };
 
   const deleteUser = async () => {
-    await axios.delete(
-      `${BASE_URL}/users/${currUser.username}`,
-      { headers }
-    );
-    setCurrUser(null);
-    setToken("");
+    try {
+      const msg = await axios.delete(
+        `${BASE_URL}/users/${currUserParsed.username}`,
+        { headers }
+      );
+      setCurrUser(null);
+      setToken("");
+      return { success: true, msg };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const getUsers = async () => {
-    const res = await axios.get(`${BASE_URL}/users`, {
-      headers,
-    });
-    return res.data.users;
+    try {
+      const res = await axios.get(`${BASE_URL}/users`, {
+        headers,
+      });
+      return { success: true, users: res.data.users };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const getPlaces = async (username) => {
-    const res = await axios.get(
-      `${BASE_URL}/users/${username}/places`,
-      { headers: headers }
-    );
-    return res.data.places;
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/users/${username}/places`,
+        { headers: headers }
+      );
+      return { success: true, places: res.data.places };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const addChild = async (data) => {
-    const res = await axios.post(
-      `${BASE_URL}/users/${currUser.username}/children/add`,
-      { ...data },
-      { headers: headers }
-    );
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/users/${currUserParsed.username}/children/add`,
+        { ...data },
+        { headers: headers }
+      );
 
-    console.log(
-      "RES from add child method",
-      res.data.children
-    );
-    return res.data.children;
+      return { success: true, children: res.data.children };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const getFriends = async (username) => {
-    const res = await axios.get(
-      `${BASE_URL}/users/${username}/friends`,
-      { headers }
-    );
-    return res.data.friends;
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/users/${username}/friends`,
+        { headers }
+      );
+      return { success: true, friends: res.data.friends };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const addFriend = async (friend) => {
-    console.log("currUser", currUser.username);
-    console.log("Friend", friend);
-    const res = await axios.post(
-      `${BASE_URL}/users/${currUser.username}/friends/${friend}/add`,
-      null,
-      { headers }
-    );
-    return res.data;
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/users/${currUserParsed.username}/friends/${friend}/add`,
+        null,
+        { headers }
+      );
+      return { success: true, friend: res.data };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const unfriend = async (friend) => {
-    const res = await axios.delete(
-      `${BASE_URL}/users/${currUser.username}/friends/${friend}/remove`,
-      { headers }
-    );
-    return res.data;
+    try {
+      const res = await axios.delete(
+        `${BASE_URL}/users/${currUserParsed.username}/friends/${friend}/remove`,
+        { headers }
+      );
+      return { success: true, msg: res.data };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const savePlace = async (id) => {
-    const res = await axios.post(
-      `${BASE_URL}/users/${currUser.username}/places/${id}`,
-      null,
-      { headers: headers }
-    );
-    return res;
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/users/${currUserParsed.username}/places/${id}`,
+        null,
+        { headers: headers }
+      );
+      return { success: true, msg: res.data };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const removePlace = async (id) => {
-    const res = await axios.delete(
-      `${BASE_URL}/users/${currUser.username}/places/${id}`,
-      { headers }
-    );
-    return res;
+    try {
+      const res = await axios.delete(
+        `${BASE_URL}/users/${currUserParsed.username}/places/${id}`,
+        { headers }
+      );
+      return { success: true, msg: res.data };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const leaveReview = async (id, data) => {
-    const res = await axios.post(
-      `${BASE_URL}/users/${currUser.username}/places/${id}/review`,
-      { ...data },
-      { headers }
-    );
-    return res;
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/users/${currUserParsed.username}/places/${id}/review`,
+        { ...data },
+        { headers }
+      );
+      return { success: true, msg: res.data };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const removeReview = async (username, id) => {
-    const res = await axios.delete(
-      `${BASE_URL}/users/${username}/places/${id}/review`,
-      { headers }
-    );
-    return res;
+    try {
+      const res = await axios.delete(
+        `${BASE_URL}/users/${username}/places/${id}/review`,
+        { headers }
+      );
+      return { success: true, msg: res };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const makeDate = async (id, timestamp) => {
-    const res = await axios.post(
-      `${BASE_URL}/users/${currUser.username}/places/${id}/date`,
-      { timestamp },
-      { headers }
-    );
-    return res.data;
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/users/${currUserParsed.username}/places/${id}/date`,
+        { timestamp },
+        { headers }
+      );
+      return { success: true, msg: res.data };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const getDates = async () => {
-    const res = await axios.get(
-      `${BASE_URL}/users/${currUser.username}/dates`,
-      { headers }
-    );
-    return res.data.dates;
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/users/${currUserParsed.username}/dates`,
+        { headers }
+      );
+      return { success: true, dates: res.data.dates };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const cancelDate = async (id, date) => {
-    const res = await axios.delete(
-      `${BASE_URL}/users/${currUser.username}/places/${id}/date`,
-      { headers, data: { timestamp: date } }
-    );
-    return res;
+    try {
+      const res = await axios.delete(
+        `${BASE_URL}/users/${currUserParsed.username}/places/${id}/date`,
+        { headers, data: { timestamp: date } }
+      );
+      return { success: true, msg: res };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   const getDateInfo = async (id, date) => {
-    console.log("DATE IN CURR USER METHOD", date);
-    const res = await axios.get(
-      `${BASE_URL}/users/${currUser.username}/places/${id}/date`,
-      { params: { timestamp: date }, headers }
-    );
-    return res;
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/users/${currUserParsed.username}/places/${id}/date`,
+        { params: { timestamp: date }, headers }
+      );
+      return { success: true, date: res.data };
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        return { success: false, errors: errs };
+      } else {
+        return {
+          success: false,
+          errors: err.response.data.error.message,
+        };
+      }
+    }
   };
 
   return (
     <CurrUserContext.Provider
       value={{
-        currUser,
+        currUserParsed,
         setCurrUser,
         token,
         login,

@@ -5,15 +5,34 @@ const UserCard = ({ user }) => {
   const { addFriend, unfriend } =
     useContext(CurrUserContext);
   const [friendStatus, setFriendStatus] = useState(false);
+  const [errors, setErrors] = useState([]);
 
   const handleClick = async () => {
-    addFriend(user.username);
+    const friendResult = await addFriend(user.username);
+    if (!friendResult.success) {
+      setErrors((errs) => [...errs, friendResult.errors]);
+      return errors;
+    }
     setFriendStatus(true);
+    return (
+      <alert>
+        <p>{friendResult.friend}</p>
+      </alert>
+    );
   };
 
   const handleUnfriend = async () => {
-    unfriend(user.username);
+    const unfriendResult = await unfriend(user.username);
+    if (!unfriendResult.success) {
+      setErrors((errs) => [...errs, unfriendResult.errors]);
+      return errors;
+    }
     setFriendStatus(false);
+    return (
+      <alert>
+        <p>{unfriendResult.msg}</p>
+      </alert>
+    );
   };
 
   return (

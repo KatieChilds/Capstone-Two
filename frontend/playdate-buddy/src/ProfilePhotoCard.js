@@ -2,12 +2,12 @@ import React, { useContext } from "react";
 import CurrUserContext from "./CurrUserContext";
 
 const ProfilePhotoCard = () => {
-  const { currUser } = useContext(CurrUserContext);
+  const { currUserParsed } = useContext(CurrUserContext);
 
   return (
     <div>
       <img
-        src={currUser.avatar}
+        src={currUserParsed.avatar}
         alt="profile avatar"
         className="avatar"
       />

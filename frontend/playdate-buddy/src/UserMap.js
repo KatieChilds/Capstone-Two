@@ -17,15 +17,16 @@ const BASE_URL =
   process.env.REACT_APP_BASE_URL || "http://localhost:3001";
 
 const UserMap = () => {
-  const { currUser, getPlaces, token } =
+  const { currUserParsed, getPlaces, token } =
     useContext(CurrUserContext);
   const [places, setPlaces] = useState([]);
   const [forceUpdate, setForceUpdate] = useState(0);
+  const [errors, setErrors] = useState([]);
   const headers = {
     Authorization: `Bearer ${token}`,
   };
-  const lat = +currUser.lat;
-  const lng = +currUser.lng;
+  const lat = +currUserParsed.lat;
+  const lng = +currUserParsed.lng;
   const location = useMemo(
     () => ({ lat, lng }),
     [lat, lng]
@@ -115,13 +116,13 @@ const UserMap = () => {
 
   useEffect(() => {
     async function getPlacesOnMount() {
-      try {
-        const res = await getPlaces(currUser.username);
-        setPlaces(res);
-        setForceUpdate((prev) => prev + 1);
-      } catch (err) {
-        console.log(err);
+      const res = await getPlaces(currUserParsed.username);
+      if (!res.success) {
+        setErrors((errs) => [...errs, res.errors]);
+        return errors;
       }
+      setPlaces(res.places);
+      setForceUpdate((prev) => prev + 1);
     }
     getPlacesOnMount();
   }, []);
@@ -148,6 +149,18 @@ const UserMap = () => {
 
   return (
     <div>
+      {errors ? (
+        <div>
+          {errors.map((error, index) => (
+            <p
+              className="error-msg"
+              key={index}
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      ) : null}
       <SearchForm
         keyVal="searchName"
         searchFor={searchFor}

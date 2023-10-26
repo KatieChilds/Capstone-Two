@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
 import currUserContext from "./CurrUserContext";
-const slide = require("./static/slide.png");
-const picnic = require("./static/picnic.png");
-const playground = require("./static/playground.jpg");
+import slide from "./static/slide.png";
+import picnic from "./static/picnic.png";
+import playground from "./static/playground.jpg";
 import { Link } from "react-router-dom";
 import "./HomePage.css";
 

@@ -67,12 +67,24 @@ router.patch(
   ensureCorrectUser,
   async function (req, res, next) {
     try {
+      console.log(
+        "REQ BODY from users patch route",
+        req.body
+      );
       const validator = jsonschema.validate(
         req.body,
         userUpdateSchema
       );
+      console.log(
+        "VALIDATOR.valid from users patch route",
+        validator.valid
+      );
       if (!validator.valid) {
         const errs = validator.errors.map((e) => e.stack);
+        console.log(
+          "ERRS in patch update users route",
+          errs
+        );
         throw new BadRequestError(errs);
       }
 

@@ -154,15 +154,17 @@ describe("PATCH /users/:username", function () {
     expect(resp.statusCode).toEqual(401);
   });
 
-  // test("bad request if invalid data", async function () {
-  //   const resp = await request(app)
-  //     .patch("/users/u1")
-  //     .send({
-  //       firstname: true,
-  //     })
-  //     .set("authorization", `Bearer ${u1Token}`);
-  //   expect(resp.statusCode).toEqual(400);
-  // }, 8000);
+  // thrown: "Exceeded timeout of 5000 ms for a test
+  // console logs in route shows correct error from validator to trigger Bad Request Error and status code of 400.
+  test("bad request if invalid data", async function () {
+    const resp = await request(app)
+      .patch("/users/u1")
+      .send({
+        firstname: 42,
+      })
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(400);
+  });
 
   test("works: can set new password", async function () {
     const resp = await request(app)
@@ -440,7 +442,7 @@ describe("GET /users/places/:id", function () {
   });
 
   test("not found if no such place", async function () {
-    const resp = await app
+    const resp = await request(app)
       .get("/users/places/no-such-place")
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(404);

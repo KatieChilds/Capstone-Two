@@ -4,6 +4,7 @@ import React, {
   useEffect,
 } from "react";
 import CurrUserContext from "./CurrUserContext";
+import "./FriendsList.css";
 
 const FriendsList = () => {
   const { currUserParsed, getFriends, unfriend } =
@@ -25,7 +26,7 @@ const FriendsList = () => {
   }, [getFriends, currUserParsed.username, errors]);
 
   const handleClick = async (friend) => {
-    const unfriendResult = unfriend(friend);
+    const unfriendResult = await unfriend(friend);
     if (!unfriendResult.success) {
       setErrors((errs) => [...errs, unfriendResult.errors]);
       return errors;
@@ -40,8 +41,8 @@ const FriendsList = () => {
 
   return (
     <div className="FriendsCardlist">
-      {errors ? (
-        <div>
+      {errors.length !== 0 ? (
+        <div className="errors-container">
           {errors.map((error, index) => (
             <p
               className="error-msg"
@@ -53,11 +54,14 @@ const FriendsList = () => {
         </div>
       ) : null}
       {friends.length !== 0 ? (
-        <div className="list">
+        <div className="friend-list">
           <h3>Friends</h3>
           <ul>
             {friends.map((friend) => (
-              <li key={friend}>
+              <li
+                key={friend}
+                className="friend-list-item"
+              >
                 {friend}
                 <button
                   className="btn btn-danger btn-sm mx-3"

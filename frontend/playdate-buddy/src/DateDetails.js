@@ -27,7 +27,7 @@ const DateDetails = () => {
   return (
     <div>
       {errors ? (
-        <div>
+        <div className="errors-container">
           {errors.map((error, index) => (
             <p
               className="error-msg"

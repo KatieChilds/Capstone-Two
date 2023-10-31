@@ -1,11 +1,32 @@
-import React, { useState, useContext } from "react";
+import React, {
+  useState,
+  useContext,
+  useEffect,
+} from "react";
 import CurrUserContext from "./CurrUserContext";
 
 const UserCard = ({ user }) => {
-  const { addFriend, unfriend } =
-    useContext(CurrUserContext);
-  const [friendStatus, setFriendStatus] = useState(false);
+  const {
+    addFriend,
+    unfriend,
+    getFriends,
+    currUserParsed,
+  } = useContext(CurrUserContext);
+  const [friends, setFriends] = useState([]);
   const [errors, setErrors] = useState([]);
+
+  useEffect(() => {
+    async function getFriendssOnMount() {
+      const res = await getFriends(currUserParsed.username);
+      if (!res.success) {
+        setErrors((errs) => [...errs, res.errors]);
+        return errors;
+      }
+
+      setFriends(res.friends);
+    }
+    getFriendssOnMount();
+  }, [getFriends, currUserParsed.username, errors]);
 
   const handleClick = async () => {
     const friendResult = await addFriend(user.username);
@@ -13,12 +34,10 @@ const UserCard = ({ user }) => {
       setErrors((errs) => [...errs, friendResult.errors]);
       return errors;
     }
-    setFriendStatus(true);
-    return (
-      <alert>
-        <p>{friendResult.friend}</p>
-      </alert>
+    const friends = await getFriends(
+      currUserParsed.username
     );
+    setFriends(friends.friends);
   };
 
   const handleUnfriend = async () => {
@@ -27,27 +46,26 @@ const UserCard = ({ user }) => {
       setErrors((errs) => [...errs, unfriendResult.errors]);
       return errors;
     }
-    setFriendStatus(false);
-    return (
-      <alert>
-        <p>{unfriendResult.msg}</p>
-      </alert>
+    const friends = await getFriends(
+      currUserParsed.username
     );
+    setFriends(friends.friends);
   };
 
   return (
-    <div className="UserCard">
+    <div className="UserCard col-md-auto">
       <div className="card border-info my-2">
         <div className="card-header">{user.username}</div>
         <div className="card-body">
           <img
             src={user.avatar}
             alt="user's avatar"
+            className="profile-avatar"
           />
           <p className="card-text">
             Name: {user.firstname}
           </p>
-          {friendStatus ? (
+          {friends.includes(user.username) ? (
             <button
               className="btn btn-primary"
               onClick={handleUnfriend}

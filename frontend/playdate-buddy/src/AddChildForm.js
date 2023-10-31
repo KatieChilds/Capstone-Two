@@ -23,10 +23,11 @@ const AddChildForm = () => {
       setErrors((errs) => [...errs, childrenResult.errors]);
       return errors;
     }
-    setCurrUser({
+    const user = {
       ...currUserParsed,
-      childrenResult,
-    });
+      children: childrenResult.children,
+    };
+    setCurrUser(JSON.stringify(user));
 
     setFormData(INITAL_STATE);
     navigate("/profile");
@@ -35,8 +36,8 @@ const AddChildForm = () => {
   return (
     <div>
       <h3 className="text-dark">Add a child</h3>
-      {errors ? (
-        <div>
+      {errors.length !== 0 ? (
+        <div className="errors-container">
           {errors.map((error, index) => (
             <p
               className="error-msg"
@@ -51,58 +52,60 @@ const AddChildForm = () => {
         onSubmit={handleSubmit}
         className="add-child-form"
       >
-        <div className="form-group mb-3">
-          <label
-            className="form-label"
-            htmlFor="gender"
-          >
-            Gender
-          </label>
-          <select
-            id="gender"
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            className="form-control"
-          >
-            <option value="">
-              -- Please choose an option --
-            </option>
-            <option
-              value="male"
-              key="male"
+        <div className="form-row">
+          <div className="form-group mb-3 me-2 col">
+            <label
+              className="form-label"
+              htmlFor="gender"
             >
-              Male
-            </option>
-            <option
-              value="female"
-              key="female"
+              Gender
+            </label>
+            <select
+              id="gender"
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              className="form-control"
             >
-              Female
-            </option>
-            <option
-              value="na"
-              key="na"
+              <option value="">
+                -- Please choose an option --
+              </option>
+              <option
+                value="male"
+                key="male"
+              >
+                Male
+              </option>
+              <option
+                value="female"
+                key="female"
+              >
+                Female
+              </option>
+              <option
+                value="na"
+                key="na"
+              >
+                N/A
+              </option>
+            </select>
+          </div>
+          <div className="form-group mb-2 col">
+            <label
+              className="form-label"
+              htmlFor="dob"
             >
-              N/A
-            </option>
-          </select>
-        </div>
-        <div className="form-group mb-2">
-          <label
-            className="form-label"
-            htmlFor="dob"
-          >
-            Date of Birth
-          </label>
-          <input
-            id="dob"
-            name="dob"
-            type="date"
-            value={formData.dob}
-            onChange={handleChange}
-            className="form-control"
-          />
+              Date of Birth
+            </label>
+            <input
+              id="dob"
+              name="dob"
+              type="date"
+              value={formData.dob}
+              onChange={handleChange}
+              className="form-control"
+            />
+          </div>
         </div>
         <button className="btn btn-dark">Add</button>
       </form>

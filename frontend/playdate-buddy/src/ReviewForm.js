@@ -43,8 +43,8 @@ const ReviewForm = () => {
 
   return (
     <div className="reviewForm-container">
-      {errors ? (
-        <div>
+      {errors.length !== 0 ? (
+        <div className="errors-container">
           {errors.map((error, index) => (
             <p
               className="error-msg"
@@ -59,82 +59,88 @@ const ReviewForm = () => {
         className="reviewForm"
         onSubmit={handleSubmit}
       >
-        <div className="form-check">
-          <label
-            className="form-check-label"
-            htmlFor="bathroom"
-          >
-            Bathroom
-          </label>
-          <input
-            className="form-check-input"
-            type="checkbox"
-            value={formData.bathroom}
-            id="bathroom"
-            name="bathroom"
-            onChange={handleChange}
-          />
+        <h4>Leave a Review</h4>
+        <div className="form-row">
+          <div className="col-sm-6">
+            <div className="form-check">
+              <label
+                className="form-check-label"
+                htmlFor="bathroom"
+              >
+                Bathroom
+              </label>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value={formData.bathroom}
+                id="bathroom"
+                name="bathroom"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-check">
+              <label
+                className="form-check-label"
+                htmlFor="changingTable"
+              >
+                Changing Table
+              </label>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value={formData.changingTable}
+                id="changingTable"
+                name="changingTable"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-check">
+              <label
+                className="form-check-label"
+                htmlFor="highchair"
+              >
+                Highchair
+              </label>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value={formData.highchair}
+                id="highchair"
+                name="highchair"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="form-check">
+              <label
+                className="form-check-label"
+                htmlFor="parking"
+              >
+                Parking
+              </label>
+              <input
+                className="form-check-input"
+                type="checkbox"
+                value={formData.parking}
+                id="parking"
+                name="parking"
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+          <div className="form-group col-sm-6">
+            <label htmlFor="otherNotes">Other Notes:</label>
+            <textarea
+              id="otherNotes"
+              name="otherNotes"
+              value={formData.otherNotes}
+              onChange={handleChange}
+              rows={3}
+              className="form-control"
+            />
+          </div>
         </div>
-        <div className="form-check">
-          <label
-            className="form-check-label"
-            htmlFor="changingTable"
-          >
-            Changing Table
-          </label>
-          <input
-            className="form-check-input"
-            type="checkbox"
-            value={formData.changingTable}
-            id="changingTable"
-            name="changingTable"
-            onChange={handleChange}
-          />
-        </div>
-        <div className="form-check">
-          <label
-            className="form-check-label"
-            htmlFor="highchair"
-          >
-            Highchair
-          </label>
-          <input
-            className="form-check-input"
-            type="checkbox"
-            value={formData.highchair}
-            id="highchair"
-            name="highchair"
-            onChange={handleChange}
-          />
-        </div>
-        <div className="form-check">
-          <label
-            className="form-check-label"
-            htmlFor="parking"
-          >
-            Parking
-          </label>
-          <input
-            className="form-check-input"
-            type="checkbox"
-            value={formData.parking}
-            id="parking"
-            name="parking"
-            onChange={handleChange}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="otherNotes">Other Notes:</label>
-          <textarea
-            id="otherNotes"
-            name="otherNotes"
-            value={formData.otherNotes}
-            onChange={handleChange}
-            rows={3}
-            className="form-control"
-          />
-        </div>
-        <div className="form-group">
+
+        <div className="form-group col-12">
           <label htmlFor="stars">Stars:</label>
           <input
             className="stars"

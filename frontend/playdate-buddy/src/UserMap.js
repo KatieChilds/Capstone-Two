@@ -31,6 +31,7 @@ const UserMap = () => {
     () => ({ lat, lng }),
     [lat, lng]
   );
+  console.log("PLACES: ", places);
 
   const initMap = useCallback(
     (place = places) => {
@@ -137,20 +138,22 @@ const UserMap = () => {
       searchObj,
       { headers: headers }
     );
+    console.log("RES for search: ", res.data.place);
     let lat = +res.data.place.lat;
     let lng = +res.data.place.lng;
     let name = res.data.place.name;
     let type = res.data.place.type;
-    let id = res.data.place.id;
+    let id = res.data.place.place_id;
     let place = { name, lat, lng, type, id };
+    console.log("PLACE from res: ", place);
     setPlaces([...places, place]);
     setForceUpdate((prev) => prev + 1);
   }
 
   return (
     <div>
-      {errors ? (
-        <div>
+      {errors.length !== 0 ? (
+        <div className="errors-container">
           {errors.map((error, index) => (
             <p
               className="error-msg"

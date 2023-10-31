@@ -62,8 +62,8 @@ const DatesList = () => {
 
   return (
     <div>
-      {errors ? (
-        <div>
+      {errors.length !== 0 ? (
+        <div className="errors-container">
           {errors.map((error, index) => (
             <p
               className="error-msg"
@@ -75,40 +75,42 @@ const DatesList = () => {
         </div>
       ) : null}
       {dates.length !== 0 ? (
-        <>
+        <div className="row g-3 ms-3 me-3 mt-1 justify-content-md-center">
           {dates.map((date) => (
             <div
-              className="card border-primary mb-3"
+              className="col"
               key={uuid()}
             >
-              <div className="card-header">Playdate</div>
-              <div className="card-body">
-                <p className="card-text">
-                  Where: {date.name}
-                </p>
-                <p className="card-text">
-                  When: {formatDate(date.date)}
-                </p>
-                <button
-                  className="btn btn-info btn-sm mx-2"
-                  onClick={() =>
-                    handleClick(date.id, date.date)
-                  }
-                >
-                  Get Info
-                </button>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() =>
-                    handleCancel(date.id, date.date)
-                  }
-                >
-                  Cancel Date
-                </button>
+              <div className="card border-primary mb-3">
+                <div className="card-header">Playdate</div>
+                <div className="card-body">
+                  <p className="card-text">
+                    Where: {date.name}
+                  </p>
+                  <p className="card-text">
+                    When: {formatDate(date.date)}
+                  </p>
+                  <button
+                    className="btn btn-info btn-sm mx-2"
+                    onClick={() =>
+                      handleClick(date.id, date.date)
+                    }
+                  >
+                    Get Info
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() =>
+                      handleCancel(date.id, date.date)
+                    }
+                  >
+                    Cancel Date
+                  </button>
+                </div>
               </div>
             </div>
           ))}
-        </>
+        </div>
       ) : null}
     </div>
   );

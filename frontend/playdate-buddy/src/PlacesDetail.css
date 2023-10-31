@@ -1,0 +1,11 @@
+.card {
+  width: fit-content;
+  margin: auto;
+  margin-top: 5px;
+}
+
+.card-header {
+  background-color: #ccfbf1;
+  font-family: "Love Ya Like A Sister", Verdana, Geneva,
+    Tahoma, sans-serif;
+}

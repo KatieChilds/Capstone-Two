@@ -1,0 +1,18 @@
+.navbar-title {
+  font-family: "Love Ya Like A Sister", Verdana, Geneva,
+    Tahoma, sans-serif;
+  font-weight: bolder;
+}
+
+.nav-link {
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  font-family: "Indie Flower", Verdana, Geneva, Tahoma,
+    sans-serif;
+  font-size: 24px;
+}
+
+.nav-link:hover {
+  color: white;
+  border-bottom: 3px solid #5eead4;
+}

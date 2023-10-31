@@ -19,8 +19,8 @@ const ProfileForm = () => {
   const INITIAL_STATE = {
     username: currUserParsed.username,
     password: "",
-    firstName: currUserParsed.firstname,
-    lastName: currUserParsed.lastname,
+    firstname: currUserParsed.firstname,
+    lastname: currUserParsed.lastname,
     email: currUserParsed.email,
     city: "",
     country: "",
@@ -71,8 +71,9 @@ const ProfileForm = () => {
 
   return (
     <div className="form-container">
-      {errors ? (
-        <div>
+      <h3>Make changes to your profile</h3>
+      {errors.length !== 0 ? (
+        <div className="errors-container">
           {errors.map((error, index) => (
             <p
               className="error-msg"
@@ -88,151 +89,161 @@ const ProfileForm = () => {
         onSubmit={handleSubmit}
       >
         <fieldset>
-          <div className="form-floating mb-3">
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="form-control"
-              disabled
-            />
-            <label
-              htmlFor="username"
-              className="form-label"
-            >
-              Username
-            </label>
-          </div>
-          <div className="form-floating mb-3">
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="form-control"
-            />
-            <label
-              htmlFor="password"
-              className="form-label"
-            >
-              Password
-            </label>
-          </div>
-          <div className="form-floating mb-3">
-            <input
-              type="text"
-              id="firstname"
-              name="firstname"
-              value={formData.firstname}
-              onChange={handleChange}
-              className="form-control"
-            />
-            <label
-              htmlFor="firstname"
-              className="form-label"
-            >
-              First Name
-            </label>
-          </div>
-          <div className="form-floating mb-3">
-            <input
-              type="text"
-              id="lastname"
-              name="lastname"
-              value={formData.lastname}
-              onChange={handleChange}
-              className="form-control"
-            />
-            <label
-              htmlFor="lastname"
-              className="form-label"
-            >
-              Last Name
-            </label>
-          </div>
-          <div className="form-floating mb-3">
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="form-control"
-            />
-            <label
-              htmlFor="email"
-              className="form-label"
-            >
-              Email
-            </label>
-          </div>
-          <div className="form-floating mb-3">
-            <input
-              type="text"
-              id="city"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              className="form-control"
-            />
-            <label
-              htmlFor="city"
-              className="form-label"
-            >
-              City
-            </label>
-          </div>
-          <div className="form-group">
-            <label
-              htmlFor="country"
-              className="form-label"
-            >
-              Country
-            </label>
-            <select
-              id="country"
-              name="country"
-              value={formData.country}
-              onChange={handleChange}
-              className="form-control"
-            >
-              <option value="">
-                -- Please choose an option --
-              </option>
-              {countryChoices.map((country) => (
-                <option
-                  key={country}
-                  value={country}
-                >
-                  {country}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-check">
-            <label
-              htmlFor="avatar"
-              className="form-label"
-            >
-              Choose your avatar:
-            </label>
-            <input
-              type="radio"
-              id="avatar"
-              name="avatar"
-              value={formData.avatar}
-              onChange={handleChange}
-            />
-            <label htmlFor="avatar">
-              <img
-                className="avatar"
-                src={defaultAvatar}
-                alt="default avatar"
+          <div className="form-row">
+            <div className="form-floating mb-3 me-2 col-sm-6">
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className="form-control"
+                disabled
               />
-            </label>
+              <label
+                htmlFor="username"
+                className="form-label"
+              >
+                Username
+              </label>
+            </div>
+            <div className="form-floating mb-3 col-sm-6">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="form-control"
+              />
+              <label
+                htmlFor="password"
+                className="form-label"
+              >
+                Password
+              </label>
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-floating mb-3 me-2 col-sm-6">
+              <input
+                type="text"
+                id="firstname"
+                name="firstname"
+                value={formData.firstname}
+                onChange={handleChange}
+                className="form-control"
+              />
+              <label
+                htmlFor="firstname"
+                className="form-label"
+              >
+                First Name
+              </label>
+            </div>
+            <div className="form-floating mb-3 col-sm-6">
+              <input
+                type="text"
+                id="lastname"
+                name="lastname"
+                value={formData.lastname}
+                onChange={handleChange}
+                className="form-control"
+              />
+              <label
+                htmlFor="lastname"
+                className="form-label"
+              >
+                Last Name
+              </label>
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-floating mb-3 col-12">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="form-control"
+              />
+              <label
+                htmlFor="email"
+                className="form-label"
+              >
+                Email
+              </label>
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-floating mb-3 me-2 col-sm-6">
+              <input
+                type="text"
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                className="form-control"
+              />
+              <label
+                htmlFor="city"
+                className="form-label"
+              >
+                City
+              </label>
+            </div>
+            <div className="form-group col-sm-6">
+              <label
+                htmlFor="country"
+                className="form-label"
+              >
+                Country
+              </label>
+              <select
+                id="country"
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                className="form-control"
+              >
+                <option value="">
+                  -- Please choose an option --
+                </option>
+                {countryChoices.map((country) => (
+                  <option
+                    key={country}
+                    value={country}
+                  >
+                    {country}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-check my-4 col-12">
+              <label
+                htmlFor="avatar"
+                className="form-label me-3"
+              >
+                Choose your avatar:
+              </label>
+              <input
+                type="radio"
+                id="avatar"
+                name="avatar"
+                value={formData.avatar}
+                onChange={handleChange}
+              />
+              <label htmlFor="avatar">
+                <img
+                  className="avatar ms-2"
+                  src={defaultAvatar}
+                  alt="default avatar"
+                />
+              </label>
+            </div>
           </div>
         </fieldset>
         <button

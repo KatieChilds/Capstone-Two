@@ -38,17 +38,12 @@ const PlacesCardList = () => {
       return errors;
     }
     setIsRemoved(true);
-    return (
-      <alert>
-        <p>{removeResult}</p>
-      </alert>
-    );
   };
 
   return (
     <div className="PlacesCardList">
-      {errors ? (
-        <div>
+      {errors.length !== 0 ? (
+        <div className="errors-container">
           {errors.map((error, index) => (
             <p
               className="error-msg"
@@ -60,7 +55,7 @@ const PlacesCardList = () => {
         </div>
       ) : null}
       {places.length !== 0 ? (
-        <div className="List">
+        <div className="row g-3 ms-3 me-3 mt-1 justify-content-md-center">
           {places.map((place) => (
             <PlacesCard
               place={place}

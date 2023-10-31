@@ -29,8 +29,8 @@ const LoginForm = () => {
   return (
     <div className="form-container">
       <h3 className="text-info">Login below</h3>
-      {errors ? (
-        <div>
+      {errors.length !== 0 ? (
+        <div className="errors-container">
           {errors.map((error, index) => (
             <p
               className="error-msg"
@@ -42,34 +42,45 @@ const LoginForm = () => {
         </div>
       ) : null}
       <form
-        className="AuthForm"
+        className="authForm"
         onSubmit={handleSubmit}
       >
         <fieldset>
-          <div className="form-floating mb-3">
-            <label htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="form-control"
-            />
+          <div className="form-row">
+            <div className="form-floating mb-3 me-2 col-12">
+              <input
+                type="text"
+                id="username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                className="form-control"
+                placeholder="Username"
+              />
+              <label htmlFor="username">Username</label>
+            </div>
           </div>
-          <div className="form-floating mb-3">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="form-control"
-            />
+          <div className="form-row">
+            <div className="form-floating mb-3 col-12">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="form-control"
+                placeholder="Password"
+              />
+              <label htmlFor="password">Password</label>
+            </div>
           </div>
         </fieldset>
-        <button className="btn btn-primary">Submit</button>
+        <button
+          className="btn btn-primary"
+          type="submit"
+        >
+          Submit
+        </button>
       </form>
     </div>
   );

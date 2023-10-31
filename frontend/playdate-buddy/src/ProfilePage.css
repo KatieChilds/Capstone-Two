@@ -1,10 +1,48 @@
-.user-info {
-  width: 50%;
-  margin: auto;
-  border: 3px solid goldenrod;
+.profile-page {
+  display: flex;
+  justify-content: center;
+  column-gap: 10px;
 }
 
+.user-info {
+  margin: 5px;
+  text-align: left;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.profile-col-one {
+  border: 3px solid #2dd4bf;
+  border-radius: 8px;
+  background-color: #ccfbf1;
+  width: fit-content;
+  float: left;
+  padding: 0 10px;
+  margin-top: 10px;
+}
+
+h5 {
+  font-weight: bold;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
 .children-info {
-  width: 50%;
-  margin: auto;
+  margin: 5px;
+  text-align: left;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.profile-col-two {
+  border: 3px solid #2dd4bf;
+  border-radius: 8px;
+  background-color: #ccfbf1;
+  width: fit-content;
+  float: left;
+  padding: 0 10px;
+  margin-top: 10px;
+  flex-basis: 20%;
+  height: fit-content;
+}
+
+.profile-avatar {
+  width: 6em;
+  height: 6em;
 }

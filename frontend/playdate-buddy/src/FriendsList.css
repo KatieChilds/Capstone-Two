@@ -1,0 +1,8 @@
+.friend-list {
+  width: fit-content;
+  margin: auto;
+}
+
+.friend-list-item {
+  margin-bottom: 3px;
+}

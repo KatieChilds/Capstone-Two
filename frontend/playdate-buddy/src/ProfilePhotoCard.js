@@ -9,7 +9,7 @@ const ProfilePhotoCard = () => {
       <img
         src={currUserParsed.avatar}
         alt="profile avatar"
-        className="avatar"
+        className="profile-avatar"
       />
     </div>
   );

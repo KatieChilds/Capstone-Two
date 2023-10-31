@@ -13,7 +13,10 @@ const PlacesCard = ({ place, handleRemove }) => {
   };
 
   return (
-    <div key={place.id}>
+    <div
+      className="placeCard col-md-auto"
+      key={place.id}
+    >
       <p>
         {place.name} - {place.type}
       </p>
@@ -27,7 +30,7 @@ const PlacesCard = ({ place, handleRemove }) => {
         onClick={handleClickRemove}
         className="btn btn-danger btn-sm"
       >
-        Remove from Saved
+        Remove
       </button>
     </div>
   );

@@ -655,7 +655,7 @@ class User {
   static async allDatesPlace(id) {
     let results = await db.query(
       `SELECT username, place_id, TO_CHAR(date,'YYYY-MM-DD HH24:MI:SS') AS date FROM dates
-      WHERE place_id = $1`,
+      WHERE place_id = $1 AND date >= CURRENT_DATE`,
       [id]
     );
 
@@ -712,7 +712,7 @@ class User {
       FROM places AS p
       JOIN dates AS d
       ON p.id = d.place_id
-      WHERE username = $1`,
+      WHERE username = $1 AND d.date >= CURRENT_DATE`,
       [username]
     );
 

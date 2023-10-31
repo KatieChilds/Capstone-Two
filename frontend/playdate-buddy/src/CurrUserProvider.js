@@ -195,7 +195,6 @@ const CurrUserProvider = ({ children }) => {
         { ...data },
         { headers: headers }
       );
-
       return { success: true, children: res.data.children };
     } catch (err) {
       if (Array.isArray(err.response.data.error.message)) {

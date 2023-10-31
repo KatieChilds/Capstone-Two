@@ -11,6 +11,7 @@ import axios from "axios";
 import moment from "moment";
 import { v4 as uuid } from "uuid";
 import DateForm from "./DateForm";
+import "./PlacesDetail.css";
 
 const BASE_URL =
   process.env.REACT_APP_BASE_URL || "http://localhost:3001";
@@ -23,10 +24,11 @@ const PlacesDetail = () => {
     makeDate,
     currUserParsed,
     removeReview,
+    getPlaces,
   } = useContext(CurrUserContext);
   const [place, setPlace] = useState({});
   const [dates, setDates] = useState([]);
-  const [savedStatus, setSavedStatus] = useState(false);
+  const [saved, setSaved] = useState([]);
   const [placeLoaded, setPlaceLoaded] = useState(false);
   const [click, setClick] = useState(false);
   const [disabled, setDisabled] = useState(false);
@@ -44,6 +46,7 @@ const PlacesDetail = () => {
   }, []);
 
   async function fetchPlace() {
+    // Fetch place data based on id
     try {
       let res = await axios.get(
         `${BASE_URL}/users/places/${id}`,
@@ -64,12 +67,55 @@ const PlacesDetail = () => {
         ]);
       }
     }
+    // Fetch date data for the place
     try {
       let dateRes = await axios.get(
         `${BASE_URL}/users/places/${id}/dates`,
         { headers }
       );
-      setDates(dateRes.data.dates);
+      const groupedUsernames = new Map();
+
+      // Iterate through the 'dates' array
+      for (const date of dateRes.data.dates) {
+        // Create a unique key based on place and date
+        const key = `${date.place}_${date.date}`;
+
+        // Check if the key already exists in the map, if not, initialize it with an empty array
+        if (!groupedUsernames.has(key)) {
+          groupedUsernames.set(key, []);
+        }
+
+        // Push the username to the array associated with the key
+        groupedUsernames.get(key).push(date.username);
+      }
+
+      // Convert the map values to an array of objects
+      const groupedUsernamesArray = [
+        ...groupedUsernames.entries(),
+      ].map(([key, usernames]) => {
+        const [place, date] = key.split("_");
+        return { place, date, usernames };
+      });
+      setDates(groupedUsernamesArray);
+    } catch (err) {
+      if (Array.isArray(err.response.data.error.message)) {
+        const errs = err.response.data.error.message.map(
+          (e) => e
+        );
+        setErrors((e) => [...e, ...errs]);
+      } else {
+        setErrors((e) => [
+          ...e,
+          err.response.data.error.message,
+        ]);
+      }
+    }
+    // Fetch saved places for the current user
+    try {
+      const userPlaces = await getPlaces(
+        currUserParsed.username
+      );
+      setSaved(userPlaces.places);
     } catch (err) {
       if (Array.isArray(err.response.data.error.message)) {
         const errs = err.response.data.error.message.map(
@@ -101,15 +147,12 @@ const PlacesDetail = () => {
     const savePlaceRes = await savePlace(id);
     if (!savePlaceRes.success) {
       setErrors((errs) => [...errs, savePlaceRes.errors]);
-      console.log(savePlaceRes.errors);
       return errors;
     }
-    setSavedStatus(true);
-    return (
-      <alert>
-        <p>{savePlaceRes.msg}</p>
-      </alert>
+    const userPlaces = await getPlaces(
+      currUserParsed.username
     );
+    setSaved(userPlaces.places);
   };
 
   const handleClick = () => {
@@ -123,11 +166,6 @@ const PlacesDetail = () => {
       return errors;
     }
     setDisabled(true);
-    return (
-      <alert>
-        <p>{dateResult.msg}</p>
-      </alert>
-    );
   };
 
   const handleDelete = async (username) => {
@@ -137,19 +175,14 @@ const PlacesDetail = () => {
       return errors;
     }
     setReviewDeleted(true);
-    return (
-      <alert>
-        <p>{reviewResult.msg}</p>
-      </alert>
-    );
   };
 
   useEffect(() => {}, [errors]);
 
   return (
     <div className="placesDetails">
-      {errors ? (
-        <div>
+      {errors.length !== 0 ? (
+        <div className="errors-container">
           {errors.map((error, index) => (
             <p
               className="error-msg"
@@ -180,7 +213,9 @@ const PlacesDetail = () => {
               <button
                 className="btn btn-success"
                 onClick={handleSave}
-                disabled={savedStatus}
+                disabled={saved.some(
+                  (place) => place.id === id
+                )}
               >
                 Save Place
               </button>
@@ -194,54 +229,63 @@ const PlacesDetail = () => {
               {click ? <DateForm /> : null}
             </div>
           </div>
-          {place.reviews.length !== 0 ? (
-            <div className="reviews-container">
-              {place.reviews.map((review) => (
-                <ReviewsCard
-                  review={review}
-                  key={review.id}
-                  handleDelete={handleDelete}
-                />
-              ))}
-            </div>
-          ) : (
-            <h4>No reviews</h4>
-          )}
-          {dates.length !== 0 ? (
-            <div className="dates-container">
-              <h4>Scheduled Playdates:</h4>
-              {dates.map((date) => (
-                <div
-                  className="card border-warning mb-3"
-                  key={uuid()}
-                >
-                  <div className="card-body">
-                    <p className="card-text">
-                      Who: {date.username}
-                    </p>
-                    <p className="card-text">
-                      When:{" "}
-                      {moment(date.date).format(
-                        "dddd, MMMM Do YYYY, h:mm:ss a"
-                      )}
-                    </p>
-                    <button
-                      className="btn btn-warning"
-                      onClick={() => handleJoin(date.date)}
-                      disabled={
-                        currUserParsed.username ===
-                          date.username || disabled
-                      }
-                    >
-                      Join Playdate
-                    </button>
+          <div className="row">
+            {place.reviews.length !== 0 ? (
+              <div className="reviews-container col">
+                <h4>Reviews:</h4>
+                {place.reviews.map((review) => (
+                  <ReviewsCard
+                    review={review}
+                    key={review.id}
+                    handleDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            ) : (
+              <h4>No reviews</h4>
+            )}
+            {dates.length !== 0 ? (
+              <div className="dates-container col">
+                <h4>Scheduled Playdates:</h4>
+                {dates.map((date) => (
+                  <div
+                    className="card border-warning mb-3"
+                    key={uuid()}
+                  >
+                    <div className="card-body">
+                      <p className="card-text">
+                        Who:{" "}
+                        {date.usernames.length > 1
+                          ? date.usernames.join(", ")
+                          : date.usernames[0]}
+                      </p>
+                      <p className="card-text">
+                        When:{" "}
+                        {moment(date.date).format(
+                          "dddd, MMMM Do YYYY, h:mm:ss a"
+                        )}
+                      </p>
+                      <button
+                        className="btn btn-warning"
+                        onClick={() =>
+                          handleJoin(date.date)
+                        }
+                        disabled={
+                          date.usernames.includes(
+                            currUserParsed.username
+                          ) || disabled
+                        }
+                      >
+                        Join Playdate
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <h4>No Playdates</h4>
-          )}
+                ))}
+              </div>
+            ) : (
+              <h4>No Playdates</h4>
+            )}
+          </div>
         </div>
       ) : (
         <div>Loading Place Details...</div>

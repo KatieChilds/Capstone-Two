@@ -22,10 +22,21 @@
   inline-size: var(--w);
   position: relative;
   touch-action: manipulation;
+  cursor: pointer;
 }
 
 [dir="rtl"] .stars {
   --dir: left;
+}
+
+.stars::-moz-range-track {
+  background: linear-gradient(
+    to var(--dir),
+    var(--fill) 0 var(--x),
+    var(--fillbg) 0 var(--x)
+  );
+  block-size: 100%;
+  mask: repeat left center/var(--starsize) var(--symbol);
 }
 
 .stars::-webkit-slider-runnable-track {
@@ -40,9 +51,23 @@
     var(--symbol);
 }
 
+.stars::-moz-range-thumb {
+  height: var(--starsize);
+  opacity: 0;
+  width: var(--starsize);
+}
+.stars::-webkit-slider-thumb {
+  height: var(--starsize);
+  opacity: 0;
+  width: var(--starsize);
+  -webkit-appearance: none;
+}
+
 .stars {
   display: block;
   margin: auto;
   margin-bottom: 5px;
   font-family: ui-sans-serif, system-ui, sans-serif;
+  -webkit-appearance: none;
+  appearance: none;
 }

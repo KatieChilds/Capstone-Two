@@ -47,7 +47,10 @@ const DateDetails = () => {
       <p>Where: {dateInfo.where}</p>
       <p>When: {dateInfo.when}</p>
       {dateInfo.with ? (
-        <ul style={{ width: "fit-content" }}>
+        <ul
+          className="m-auto"
+          style={{ width: "fit-content" }}
+        >
           Who:
           {dateInfo.with.map((w) => (
             <li key={w.username}>{w.username}</li>

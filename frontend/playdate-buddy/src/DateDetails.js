@@ -19,8 +19,11 @@ const DateDetails = () => {
         setErrors((errs) => [...errs, dateRes.errors]);
         return errors;
       }
-      console.log("DATE RES in component: ", dateRes);
-      setDateInfo(dateRes.date);
+      console.log(
+        "DATE RES in component: ",
+        dateRes.date.date
+      );
+      setDateInfo(dateRes.date.date);
       console.log("DATE INFO from state: ", dateInfo);
     }
     getDateDetailsOnMount();

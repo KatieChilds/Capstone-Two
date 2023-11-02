@@ -37,8 +37,11 @@ async function googlePlacesAPICall(searchName, lat, lng) {
     lat,
     lng
   );
+  // const result = await axios.get(
+  //   `${GOOGLE_PLACES_API_BASE_URL}${term}&inputtype=textquery&locationbias=circle%3A30000%${lat}%2C${lng}&key=${GOOGLE_API_KEY}`
+  // );
   const result = await axios.get(
-    `${GOOGLE_PLACES_API_BASE_URL}${term}&inputtype=textquery&locationbias=circle%3A1000%${lat}%2C${lng}&key=${GOOGLE_API_KEY}`
+    `${GOOGLE_PLACES_API_BASE_URL}${term}&inputtype=textquery&location=${lat}%2C${lng}&radius=30000&key=${GOOGLE_API_KEY}`
   );
   console.log("API results: ", result.data);
   if (result.data.candidates.length !== 0) {

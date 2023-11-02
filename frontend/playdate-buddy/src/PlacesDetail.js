@@ -18,6 +18,7 @@ const BASE_URL =
 
 const PlacesDetail = () => {
   const { id } = useParams();
+  console.log("PLACE DETAILS id from params: ", id);
   const {
     token,
     savePlace,

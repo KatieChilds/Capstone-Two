@@ -4,6 +4,8 @@ import CurrUserContext from "./CurrUserContext";
 import axios from "axios";
 import countries from "./static/countries";
 import defaultAvatar from "./static/avatar_images/user_default_avatar.png";
+import maleAvatar from "./static/avatar_images/user_male_avatar.png";
+import femaleAvatar from "./static/avatar_images/user_female_avatar.png";
 import "./SignupForm.css";
 
 const BASE_URL =
@@ -231,16 +233,47 @@ const ProfileForm = () => {
               </label>
               <input
                 type="radio"
-                id="avatar"
+                id="default-avatar"
                 name="avatar"
-                value={formData.avatar}
+                value={defaultAvatar}
+                checked={formData.avatar === defaultAvatar}
+                onChange={handleChange}
+              />
+              <label htmlFor="avatar">
+                <img
+                  className="avatar ms-2 me-3"
+                  src={defaultAvatar}
+                  alt="default avatar"
+                />
+              </label>
+              <input
+                type="radio"
+                id="male-avatar"
+                name="avatar"
+                value={maleAvatar}
+                checked={formData.avatar === maleAvatar}
+                onChange={handleChange}
+              />
+              <label htmlFor="avatar">
+                <img
+                  className="avatar ms-2 me-3"
+                  src={maleAvatar}
+                  alt="male avatar"
+                />
+              </label>
+              <input
+                type="radio"
+                id="female-avatar"
+                name="avatar"
+                value={femaleAvatar}
+                checked={formData.avatar === femaleAvatar}
                 onChange={handleChange}
               />
               <label htmlFor="avatar">
                 <img
                   className="avatar ms-2"
-                  src={defaultAvatar}
-                  alt="default avatar"
+                  src={femaleAvatar}
+                  alt="female avatar"
                 />
               </label>
             </div>

@@ -19,14 +19,16 @@ const DateDetails = () => {
         setErrors((errs) => [...errs, dateRes.errors]);
         return errors;
       }
+      console.log("DATE RES in component: ", dateRes);
       setDateInfo(dateRes.date);
+      console.log("DATE INFO from state: ", dateInfo);
     }
     getDateDetailsOnMount();
   }, [date, errors, getDateInfo, id]);
 
   return (
     <div>
-      {errors ? (
+      {errors.length !== 0 ? (
         <div className="errors-container">
           {errors.map((error, index) => (
             <p

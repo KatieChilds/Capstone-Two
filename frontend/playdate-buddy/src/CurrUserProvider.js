@@ -441,6 +441,7 @@ const CurrUserProvider = ({ children }) => {
         `${BASE_URL}/users/${currUserParsed.username}/places/${id}/date`,
         { params: { timestamp: date }, headers }
       );
+      console.log("DATE INFO in provider", res.data);
       return { success: true, date: res.data };
     } catch (err) {
       if (Array.isArray(err.response.data.error.message)) {

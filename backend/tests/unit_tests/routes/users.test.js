@@ -381,7 +381,11 @@ describe("POST /users/place/search", function () {
   test("works for logged in user", async function () {
     const resp = await request(app)
       .post("/users/place/search")
-      .send({ searchName: "Ottawa Canada" })
+      .send({
+        searchName: "Ottawa Canada",
+        lat: 45.4,
+        lng: -75.7,
+      })
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
       place: {

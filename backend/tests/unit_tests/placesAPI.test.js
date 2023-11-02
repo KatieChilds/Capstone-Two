@@ -45,7 +45,11 @@ describe("findPlace", () => {
     });
 
     // Call findPlace function
-    const result = await findPlace("Sample Place");
+    const result = await findPlace(
+      "Sample Place",
+      42.0,
+      -71.5
+    );
 
     expect(result).toEqual({
       place_id: "sample_place_id",
@@ -89,7 +93,11 @@ describe("findPlace", () => {
       ],
     });
 
-    const result = await findPlace("Sample Place");
+    const result = await findPlace(
+      "Sample Place",
+      42.0,
+      -71.5
+    );
 
     expect(result).toEqual({
       place_id: "sample_place_id",

@@ -30,10 +30,10 @@ async function addPlace(place) {
   }
 }
 
-async function googlePlacesAPICall(searchName) {
+async function googlePlacesAPICall(searchName, lat, lng) {
   const term = searchName.replaceAll(" ", "%2C").trim();
   const result = await axios.get(
-    `${GOOGLE_PLACES_API_BASE_URL}${term}&inputtype=textquery&key=${GOOGLE_API_KEY}`
+    `${GOOGLE_PLACES_API_BASE_URL}${term}&inputtype=textquery&locationbias=circle%3A2000%${lat}%2C${lng}&key=${GOOGLE_API_KEY}`
   );
   if (result.data.candidates.length !== 0) {
     const { name, place_id, formatted_address } =
@@ -86,11 +86,15 @@ async function googlePlaceDetailsAPICall(id) {
   );
 }
 
-async function findPlace(searchName) {
-  let placeInfo = await googlePlacesAPICall(searchName);
+async function findPlace(searchName, lat, lng) {
+  let placeInfo = await googlePlacesAPICall(
+    searchName,
+    lat,
+    lng
+  );
 
   let placeCheck = await db.query(
-    `SELECT id AS place_id, name, address, lat, lng, type
+    `SELECT id, name, address, lat, lng, type
       FROM places
       WHERE id = $1`,
     [placeInfo.place_id]

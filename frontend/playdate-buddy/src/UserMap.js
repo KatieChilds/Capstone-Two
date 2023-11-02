@@ -135,7 +135,11 @@ const UserMap = () => {
   async function searchFor(searchObj) {
     const res = await axios.post(
       `${BASE_URL}/users/place/search`,
-      searchObj,
+      {
+        ...searchObj,
+        lat: currUserParsed.lat,
+        lng: currUserParsed.lng,
+      },
       { headers: headers }
     );
     console.log("RES for search: ", res.data.place);
@@ -143,7 +147,7 @@ const UserMap = () => {
     let lng = +res.data.place.lng;
     let name = res.data.place.name;
     let type = res.data.place.type;
-    let id = res.data.place.place_id;
+    let id = res.data.place.id;
     let place = { name, lat, lng, type, id };
     console.log("PLACE from res: ", place);
     setPlaces([...places, place]);

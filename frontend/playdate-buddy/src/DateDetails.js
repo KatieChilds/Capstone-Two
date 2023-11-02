@@ -43,11 +43,11 @@ const DateDetails = () => {
           ))}
         </div>
       ) : null}
-      <h5>Date Info:</h5>
+      <h4>Date Info:</h4>
       <p>Where: {dateInfo.where}</p>
       <p>When: {dateInfo.when}</p>
       {dateInfo.with ? (
-        <ul>
+        <ul style={{ width: "fit-content" }}>
           Who:
           {dateInfo.with.map((w) => (
             <li key={w.username}>{w.username}</li>

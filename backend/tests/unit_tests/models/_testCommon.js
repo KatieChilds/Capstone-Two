@@ -14,10 +14,12 @@ async function commonBeforeAll() {
                         last_name,
                         email,
                         lat,
-                        lng)
-        VALUES('u1', $1, 'user', 'one', 'u1@email.com', 123, 456),
-        ('u2', $2, 'user', 'two', 'u2@email.com', 123, 456),
-        ('u3', $3, 'user', 'three', 'u3@email.com', 123, 456)
+                        lng,
+                        city,
+                        country)
+        VALUES('u1', $1, 'user', 'one', 'u1@email.com', 123, 456, 'city', 'country'),
+        ('u2', $2, 'user', 'two', 'u2@email.com', 123, 456, 'city', 'country'),
+        ('u3', $3, 'user', 'three', 'u3@email.com', 123, 456, 'city', 'country')
         RETURNING username
     `,
     [

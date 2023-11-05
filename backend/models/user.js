@@ -29,6 +29,8 @@ class User {
                     email,
                     lat,
                     lng,
+                    city,
+                    country,
                     token
             FROM users
             WHERE username = $1`,
@@ -98,10 +100,12 @@ class User {
                 email,
                 lat,
                 lng,
+                city,
+                country,
                 avatar,
                 token)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING username, first_name AS "firstname", last_name AS "lastname", email, lat, lng, avatar, token AS access_token`,
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING username, first_name AS "firstname", last_name AS "lastname", email, lat, lng, city, country, avatar, token AS access_token`,
       [
         username,
         hashedPassword,
@@ -110,6 +114,8 @@ class User {
         email,
         lat,
         lng,
+        city,
+        country,
         avatar,
         access_token,
       ]
@@ -164,7 +170,7 @@ class User {
   //   Given a username, return info for that user, including info about children: {age, gender}. Throws NotFoundError if user not found.
   static async get(username) {
     const userRes = await db.query(
-      `SELECT username, first_name AS firstname, last_name AS lastname, email, lat, lng, avatar
+      `SELECT username, first_name AS firstname, last_name AS lastname, email, lat, lng, city, country, avatar
         FROM users
         WHERE username = $1`,
       [username]
@@ -209,8 +215,6 @@ class User {
       );
       const lat = place.lat;
       const lng = place.lng;
-      delete data.city;
-      delete data.country;
       data = { ...data, lat, lng };
     }
 
@@ -220,6 +224,8 @@ class User {
       email: "email",
       lat: "lat",
       lng: "lng",
+      city: "city",
+      country: "country",
       avatar: "avatar",
     });
 
@@ -234,6 +240,8 @@ class User {
                       email,
                       lat,
                       lng,
+                      city,
+                      country,
                       avatar`;
 
     const result = await db.query(querySql, [

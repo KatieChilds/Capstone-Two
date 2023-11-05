@@ -19,6 +19,8 @@ describe("createToken", function () {
       username: "u1",
       lat: 123,
       lng: 456,
+      city: "Ottawa",
+      country: "Canada",
       access_token: "mocked-access-token",
     };
     const token = createToken(user);
@@ -28,6 +30,8 @@ describe("createToken", function () {
       username: "u1",
       lat: 123,
       lng: 456,
+      city: "Ottawa",
+      country: "Canada",
       access_token: "mocked-access-token",
     });
   });
@@ -37,6 +41,8 @@ describe("createToken", function () {
       username: "u1",
       lat: 123,
       lng: 456,
+      city: "Ottawa",
+      country: "Canada",
       access_token: null,
     };
     const token = createToken(user);
@@ -46,6 +52,8 @@ describe("createToken", function () {
       username: "u1",
       lat: 123,
       lng: 456,
+      city: "Ottawa",
+      country: "Canada",
       access_token: null,
     });
   });

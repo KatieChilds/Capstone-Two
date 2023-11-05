@@ -24,8 +24,8 @@ const ProfileForm = () => {
     firstname: currUserParsed.firstname,
     lastname: currUserParsed.lastname,
     email: currUserParsed.email,
-    city: "",
-    country: "",
+    city: currUserParsed.city,
+    country: currUserParsed.country,
     avatar: currUserParsed.avatar,
   };
   const [formData, setFormData] = useState(INITIAL_STATE);

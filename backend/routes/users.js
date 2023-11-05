@@ -217,8 +217,12 @@ router.post(
   ensureLoggedIn,
   async function (req, res, next) {
     try {
-      const { searchName, lat, lng } = req.body;
-      const place = await findPlace(searchName, lat, lng);
+      const { searchName, city, country } = req.body;
+      const place = await findPlace(
+        searchName,
+        city,
+        country
+      );
       return res.json({ place });
     } catch (err) {
       return next(err);

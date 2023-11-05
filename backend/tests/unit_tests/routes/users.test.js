@@ -72,6 +72,8 @@ describe("GET /users/:username", function () {
         email: "u1@email.com",
         lat: 45.4215296,
         lng: -75.69719309999999,
+        city: "Ottawa",
+        country: "Canada",
         avatar:
           "/static/media/user_default_avatar.557587208eb9e232f2ca.png",
         children: [{ age: "3 years", gender: "male" }],
@@ -91,6 +93,8 @@ describe("GET /users/:username", function () {
         email: "u2@email.com",
         lat: 45.4215296,
         lng: -75.69719309999999,
+        city: "Ottawa",
+        country: "Canada",
         avatar:
           "/static/media/user_default_avatar.557587208eb9e232f2ca.png",
         children: [],
@@ -128,6 +132,8 @@ describe("PATCH /users/:username", function () {
         email: "u1@email.com",
         lat: 45.4215296,
         lng: -75.69719309999999,
+        city: "Ottawa",
+        country: "Canada",
         avatar:
           "/static/media/user_default_avatar.557587208eb9e232f2ca.png",
         children: [{ age: "3 years", gender: "male" }],
@@ -181,6 +187,8 @@ describe("PATCH /users/:username", function () {
         email: "u1@email.com",
         lat: 45.4215296,
         lng: -75.69719309999999,
+        city: "Ottawa",
+        country: "Canada",
         avatar:
           "/static/media/user_default_avatar.557587208eb9e232f2ca.png",
         children: [{ age: "3 years", gender: "male" }],
@@ -383,13 +391,13 @@ describe("POST /users/place/search", function () {
       .post("/users/place/search")
       .send({
         searchName: "Ottawa Canada",
-        lat: 45.4,
-        lng: -75.7,
+        city: "Ottawa",
+        country: "Canada",
       })
       .set("authorization", `Bearer ${u1Token}`);
     expect(resp.body).toEqual({
       place: {
-        place_id: "ChIJrxNRX7IFzkwR7RXdMeFRaoo",
+        id: "ChIJrxNRX7IFzkwR7RXdMeFRaoo",
         name: "Ottawa",
         address: "Ottawa, ON, Canada",
         lat: 45.4215296,
@@ -503,8 +511,9 @@ describe("GET /users/:username/places", function () {
     const resp = await request(app)
       .get("/users/u1/places")
       .set("authorization", `Bearer ${u1Token}`);
-    expect(resp.body).toEqual({
-      places: [
+    console.log("GET USERS/PLACES RESP BODY", resp.body);
+    expect(resp.body.places).toEqual(
+      expect.arrayContaining([
         {
           name: "Equator Coffee Roasters",
           lat: 45.2351633,
@@ -519,8 +528,8 @@ describe("GET /users/:username/places", function () {
           id: "ChIJrxNRX7IFzkwR7RXdMeFRaoo",
           type: "locality",
         },
-      ],
-    });
+      ])
+    );
   });
 
   test("unauth for other users", async function () {

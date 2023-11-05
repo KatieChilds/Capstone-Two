@@ -8,6 +8,8 @@ CREATE TABLE users (
         CHECK (position('@' IN email) > 1),
     lat FLOAT NOT NULL,
     lng FLOAT NOT NULL,
+    city TEXT NOT NULL,
+    country TEXT NOT NULL,
     avatar TEXT DEFAULT('user_default_avatar.png'),
     token TEXT 
 );

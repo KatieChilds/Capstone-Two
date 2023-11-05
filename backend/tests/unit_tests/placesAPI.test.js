@@ -47,12 +47,12 @@ describe("findPlace", () => {
     // Call findPlace function
     const result = await findPlace(
       "Sample Place",
-      42.0,
-      -71.5
+      "city",
+      "country"
     );
 
     expect(result).toEqual({
-      place_id: "sample_place_id",
+      id: "sample_place_id",
       name: "Sample Place",
       address: "Sample Address",
       lat: 42.123,
@@ -83,7 +83,7 @@ describe("findPlace", () => {
     db.query = jest.fn().mockResolvedValue({
       rows: [
         {
-          place_id: "sample_place_id",
+          id: "sample_place_id",
           name: "Sample Place",
           address: "Sample Address",
           lat: 42.123,
@@ -95,12 +95,12 @@ describe("findPlace", () => {
 
     const result = await findPlace(
       "Sample Place",
-      42.0,
-      -71.5
+      "city",
+      "country"
     );
 
     expect(result).toEqual({
-      place_id: "sample_place_id",
+      id: "sample_place_id",
       name: "Sample Place",
       address: "Sample Address",
       lat: 42.123,
@@ -155,7 +155,7 @@ describe("findPlaceFromId", () => {
     );
 
     expect(result).toEqual({
-      place_id: "sample_place_id",
+      id: "sample_place_id",
       name: "Sample Place",
       address: "Sample Address",
       lat: 42.123,

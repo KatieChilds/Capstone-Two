@@ -137,8 +137,8 @@ const UserMap = () => {
       `${BASE_URL}/users/place/search`,
       {
         ...searchObj,
-        lat: currUserParsed.lat,
-        lng: currUserParsed.lng,
+        city: currUserParsed.city,
+        country: currUserParsed.country,
       },
       { headers: headers }
     );

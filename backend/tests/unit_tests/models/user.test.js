@@ -69,6 +69,8 @@ describe("authenticate", function () {
       email: "u1@email.com",
       lat: 123,
       lng: 456,
+      city: "city",
+      country: "country",
       token: null,
     });
   });
@@ -109,8 +111,6 @@ describe("register", function () {
       ...newUser,
       password: "password",
     });
-    delete newUser.city;
-    delete newUser.country;
     delete newUser.token;
     (newUser.lat = 123), (newUser.lng = 456);
     newUser.access_token = null;
@@ -190,6 +190,8 @@ describe("get", function () {
       email: "u1@email.com",
       lat: 123,
       lng: 456,
+      city: "city",
+      country: "country",
       avatar: "user_default_avatar.png",
       children: [{ age: "3 years", gender: "male" }],
     });
@@ -204,6 +206,8 @@ describe("get", function () {
       email: "u2@email.com",
       lat: 123,
       lng: 456,
+      city: "city",
+      country: "country",
       avatar: "user_default_avatar.png",
       children: [],
     });
@@ -234,6 +238,8 @@ describe("update", function () {
       username: "u1",
       lat: 123,
       lng: 456,
+      city: "city",
+      country: "country",
       ...updateData,
       children: [{ age: "3 years", gender: "male" }],
     });
@@ -245,6 +251,8 @@ describe("update", function () {
       username: "u2",
       lat: 123,
       lng: 456,
+      city: "city",
+      country: "country",
       ...updateData,
       children: [],
     });
@@ -263,6 +271,8 @@ describe("update", function () {
       email: "u2@email.com",
       lat: 234,
       lng: 567,
+      city: "new",
+      country: "place",
       avatar: "user_default_avatar.png",
       children: [],
     });
@@ -279,6 +289,8 @@ describe("update", function () {
       email: "u1@email.com",
       lat: 123,
       lng: 456,
+      city: "city",
+      country: "country",
       avatar: "user_default_avatar.png",
       children: [{ age: "3 years", gender: "male" }],
     });

@@ -11,6 +11,8 @@ function createToken(user) {
     username: user.username,
     lat: user.lat,
     lng: user.lng,
+    city: user.city,
+    country: user.country,
     access_token: user.access_token,
   };
 

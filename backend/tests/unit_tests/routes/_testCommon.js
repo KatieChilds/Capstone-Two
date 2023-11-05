@@ -101,18 +101,24 @@ const u1Token = createToken({
   username: "u1",
   lat: 45.4215296,
   lng: -75.69719309999999,
+  city: "Ottawa",
+  country: "Canada",
   access_token: u1AccessToken,
 });
 const u2Token = createToken({
   username: "u2",
   lat: 45.4215296,
   lng: -75.69719309999999,
+  city: "Ottawa",
+  country: "Canada",
   access_token: u2AccessToken,
 });
 const u3Token = createToken({
   username: "u3",
   lat: 45.4215296,
   lng: -75.69719309999999,
+  city: "Ottawa",
+  country: "Canada",
   access_token: u3AccessToken,
 });
 

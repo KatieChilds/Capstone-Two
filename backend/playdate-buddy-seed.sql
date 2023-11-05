@@ -2,14 +2,16 @@
 
 -- Insert data into database as a starting point and to check functionality
 
-INSERT INTO users (username, password, first_name, last_name, email, lat, lng)
+INSERT INTO users (username, password, first_name, last_name, email, lat, lng, city, country)
 VALUES ('testuser',
         '$2b$12$AZH7virni5jlTTiGgEg4zu3lSvAw68qVEfSIOjJ3RqtbJbdW/Oi5q',
         'test',
         'user',
         'test@email.com',
         45.4215296,
-        -75.69719309999999
+        -75.69719309999999,
+        'Ottawa',
+        'Canada'
         ),
         ('demouser',
         '$2b$12$AZH7virni5jlTTiGgEg4zu3lSvAw68qVEfSIOjJ3RqtbJbdW/Oi5q',
@@ -17,7 +19,10 @@ VALUES ('testuser',
         'user',
         'demo@email.com',
         45.4215296,
-        -75.69719309999999);
+        -75.69719309999999,
+        'Ottawa',
+        'Canada'
+        );
 
 INSERT INTO children (parent_username, dob, gender)
 VALUES ('demouser',

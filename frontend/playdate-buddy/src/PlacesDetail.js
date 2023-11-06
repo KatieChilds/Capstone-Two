@@ -214,9 +214,11 @@ const PlacesDetail = () => {
               <button
                 className="btn btn-success"
                 onClick={handleSave}
-                disabled={saved.some(
-                  (place) => place.id === id
-                )}
+                disabled={
+                  saved
+                    ? saved.some((place) => place.id === id)
+                    : false
+                }
               >
                 Save Place
               </button>
